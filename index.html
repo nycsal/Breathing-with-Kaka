@@ -172,83 +172,51 @@
       gap: 16px;
     }
 
-    /* Animated breathing orb + rings */
+    /* New SVG breathing visual */
     .breath-visual {
       position: relative;
-      width: 210px;
-      height: 210px;
+      width: 220px;
+      height: 220px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .breath-orb {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 20%, #ffffff, #00ffff);
-      box-shadow:
-        0 0 30px rgba(0, 255, 255, 0.8),
-        0 0 60px rgba(255, 45, 149, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform: scale(1);
-      transition: transform 0.5s ease-out;
+    .breath-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg); /* start at top */
     }
 
-    .orb-core {
-      width: 50%;
-      height: 50%;
-      border-radius: 50%;
-      background: radial-gradient(circle, #050816 0, #050816 40%, rgba(5, 8, 22, 0) 100%);
-      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.8);
+    .circle-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 10;
     }
 
-    .ring {
-      position: absolute;
-      border-radius: 50%;
-      border: 1px solid rgba(0, 255, 255, 0.4);
-      pointer-events: none;
-      animation: rotate 14s linear infinite;
+    .circle-progress {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 0;
+      stroke-dashoffset: 0;
+      filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.8));
+      transition: stroke 0.25s ease;
     }
 
-    .ring.r1 { width: 160px; height: 160px; border-color: rgba(0, 255, 255, 0.25); }
-    .ring.r2 { width: 190px; height: 190px; border-color: rgba(255, 45, 149, 0.35); animation-duration: 18s; }
-    .ring.r3 { width: 210px; height: 210px; border-color: rgba(57, 255, 20, 0.35); animation-duration: 22s; }
-
-    .ring::before {
-      content: "";
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--accent3);
-      box-shadow: 0 0 18px rgba(255, 237, 0, 0.9);
-      top: -6px;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0.9;
+    .circle-ball {
+      fill: #ffffff;
+      filter:
+        drop-shadow(0 0 12px rgba(0, 255, 255, 0.9))
+        drop-shadow(0 0 20px rgba(255, 45, 149, 0.8));
+      transition: r 0.3s ease;
     }
 
-    @keyframes rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* State-based orb scaling (controlled via JS) */
-    .breath-orb.state-inhale {
-      transform: scale(1.12);
-    }
-    .breath-orb.state-hold {
-      transform: scale(1.18);
-    }
-    .breath-orb.state-exhale {
-      transform: scale(0.95);
-    }
-    .breath-orb.state-rest {
-      transform: scale(1.0);
-    }
+    .circle-ball.state-inhale { r: 8; }
+    .circle-ball.state-hold   { r: 10; }
+    .circle-ball.state-exhale { r: 6; }
+    .circle-ball.state-rest   { r: 5; }
 
     .phase-label {
       text-transform: uppercase;
@@ -274,7 +242,7 @@
 
     .timer {
       font-variant-numeric: tabular-nums;
-      font-size: 1.4rem;
+      font-size: 2rem;
       font-weight: 600;
       color: var(--primary);
       text-shadow: 0 0 13px rgba(0, 255, 255, 0.8);
@@ -431,11 +399,9 @@
       margin-left: 4px;
     }
 
-    /* Utility */
     @media (max-width: 380px) {
       .brand-title { font-size: 1.1rem; }
       .breath-visual { width: 190px; height: 190px; }
-      .breath-orb { width: 108px; height: 108px; }
     }
   </style>
 </head>
@@ -463,22 +429,20 @@
     <div class="card breath-card">
       <div class="breath-inner">
         <div class="breath-visual">
-          <div class="ring r1"></div>
-          <div class="ring r2"></div>
-          <div class="ring r3"></div>
-
-          <div class="breath-orb state-rest" id="breathOrb">
-            <div class="orb-core"></div>
-          </div>
+          <svg class="breath-svg" viewBox="0 0 200 200">
+            <circle class="circle-track" cx="100" cy="100" r="70"></circle>
+            <circle class="circle-progress" id="circleProgress" cx="100" cy="100" r="70"></circle>
+            <circle class="circle-ball state-rest" id="circleBall" cx="100" cy="30" r="5"></circle>
+          </svg>
         </div>
 
         <div class="phase-label" id="phaseLabel">Ready</div>
         <div class="main-instruction" id="instructionText">
-          Tap Start Flow and follow the orb.
+          Tap Start Flow and follow the light.
         </div>
 
         <div class="timer-row">
-          <div class="timer" id="timerDisplay">0.0s</div>
+          <div class="timer" id="timerDisplay">0</div>
           <div class="step-indicator" id="cycleIndicator">Cycle 0 / 0</div>
         </div>
 
@@ -525,17 +489,14 @@
         <div class="progress-fill" id="sessionProgress"></div>
       </div>
 
-      <div class="session-log" id="sessionLog">
-        <!-- Recent sessions -->
-      </div>
+      <div class="session-log" id="sessionLog"></div>
     </div>
   </div>
 
   <script>
     /*
       Breathing levels:
-      Each level defines inhale / hold / exhale / rest (seconds) and cycles.
-      Level 1 uses your example: inhale 7, hold 4, exhale 7.
+      Level 1 uses your pattern: inhale 7, hold 4, exhale 7, rest 4.
     */
     const levels = [
       {
@@ -584,7 +545,7 @@
       rest: "Soft pause, no forcing — just enjoy the stillness.",
     };
 
-    const phaseOrbClass = {
+    const phaseBallClass = {
       inhale: "state-inhale",
       hold: "state-hold",
       exhale: "state-exhale",
@@ -593,7 +554,8 @@
 
     const statusLabel = document.getElementById("statusLabel");
     const levelRow = document.getElementById("levelRow");
-    const breathOrb = document.getElementById("breathOrb");
+    const circleProgress = document.getElementById("circleProgress");
+    const circleBall = document.getElementById("circleBall");
     const phaseLabelEl = document.getElementById("phaseLabel");
     const instructionText = document.getElementById("instructionText");
     const hintText = document.getElementById("hintText");
@@ -608,17 +570,6 @@
     const bestStreakEl = document.getElementById("bestStreak");
     const sessionLog = document.getElementById("sessionLog");
     const todayLabel = document.getElementById("todayLabel");
-
-    let currentLevelIndex = 0;
-    let currentPhase = "inhale";
-    let currentCycle = 0;
-    let phaseStartTime = null;
-    let phaseDuration = 0;
-    let cycleCount = 0;
-    let totalCycles = 0;
-    let sessionTotalTime = 0;
-    let animationFrameId = null;
-    let running = false;
 
     // Dashboard state (localStorage-backed)
     const STORAGE_KEY = "breathWithKakaStats_v1";
@@ -638,18 +589,14 @@
           const parsed = JSON.parse(raw);
           stats = Object.assign(stats, parsed);
         }
-      } catch (e) {
-        console.warn("Could not load stats", e);
-      }
+      } catch (e) {}
       renderStats();
     }
 
     function saveStats() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-      } catch (e) {
-        console.warn("Could not save stats", e);
-      }
+      } catch (e) {}
     }
 
     function getTodayStr() {
@@ -665,10 +612,8 @@
         stats.streakLastDate = todayStr;
         return;
       }
-      if (last === todayStr) {
-        // already counted today
-        return;
-      }
+      if (last === todayStr) return;
+
       const lastDate = new Date(last);
       const todayDate = new Date(todayStr);
       const diffMs = todayDate - lastDate;
@@ -686,12 +631,12 @@
       totalMinutesEl.textContent = (stats.totalSeconds / 60).toFixed(1) + " min";
       bestStreakEl.textContent = stats.bestStreak + (stats.bestStreak === 1 ? " day" : " days");
 
-      // Today count
       const todayStr = getTodayStr();
-      const todaySessions = stats.recentSessions.filter(s => s.dateISO.slice(0, 10) === todayStr).length;
+      const todaySessions = stats.recentSessions.filter(
+        s => s.dateISO.slice(0, 10) === todayStr
+      ).length;
       todayLabel.textContent = "Today: " + todaySessions + " session" + (todaySessions === 1 ? "" : "s");
 
-      // Log
       sessionLog.innerHTML = "";
       if (stats.recentSessions.length === 0) {
         const empty = document.createElement("div");
@@ -721,11 +666,11 @@
 
     function recordSession() {
       stats.sessions += 1;
-      stats.totalSeconds += Math.round(sessionTotalTime);
+      stats.totalSeconds += Math.round(sessionTotalSeconds);
       stats.recentSessions.push({
         dateISO: new Date().toISOString(),
         levelId: levels[currentLevelIndex].id,
-        seconds: sessionTotalTime,
+        seconds: sessionTotalSeconds,
       });
       updateStreak();
       saveStats();
@@ -744,7 +689,7 @@
           `<span>L${level.id} • ${level.pattern.inhale}/${level.pattern.hold}/${level.pattern.exhale}/${level.pattern.rest}</span>` +
           `<small>${level.description}</small>`;
         chip.addEventListener("click", () => {
-          if (running) return; // don't change while running
+          if (running) return;
           currentLevelIndex = idx;
           updateLevelActive();
           resetSessionState(false);
@@ -761,27 +706,60 @@
       });
     }
 
-    /* Session logic */
+    // --- SVG circle math ---
+    const RADIUS = 70;
+    const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+    circleProgress.style.strokeDasharray = CIRCUMFERENCE;
+    circleProgress.style.strokeDashoffset = CIRCUMFERENCE;
+
+    function setBallAngle(theta) {
+      const cx = 100 + RADIUS * Math.cos(theta);
+      const cy = 100 + RADIUS * Math.sin(theta);
+      circleBall.setAttribute("cx", cx.toString());
+      circleBall.setAttribute("cy", cy.toString());
+    }
+
+    function updateCircleProgress(progress) {
+      const angle = progress * 2 * Math.PI;
+      setBallAngle(angle);
+      const offset = CIRCUMFERENCE * (1 - progress);
+      circleProgress.style.strokeDashoffset = offset;
+    }
+
+    // --- Breathing session state ---
+    let currentLevelIndex = 0;
+    let currentPhase = "inhale";
+    let currentCycle = 0;
+    let phaseRemaining = 0;
+    let phaseDuration = 0;
+    let totalCycles = 0;
+    let sessionTotalSeconds = 0;
+    let running = false;
+    let timerIntervalId = null;
+
     function resetSessionState(clearProgress = true) {
-      cancelAnimationFrame(animationFrameId);
+      if (timerIntervalId) clearInterval(timerIntervalId);
       running = false;
       startPauseBtn.textContent = "Start Flow";
       statusLabel.textContent = "Idle";
-      breathOrb.className = "breath-orb state-rest";
 
       const level = levels[currentLevelIndex];
-      cycleCount = 0;
+      currentCycle = 0;
       totalCycles = level.cycles;
       currentPhase = "inhale";
-      phaseStartTime = null;
+      phaseRemaining = 0;
       phaseDuration = 0;
-      sessionTotalTime = 0;
+      sessionTotalSeconds = 0;
 
-      timerDisplay.textContent = "0.0s";
+      timerDisplay.textContent = "0";
       cycleIndicator.textContent = "Cycle 0 / " + level.cycles;
       phaseLabelEl.textContent = "Ready";
-      instructionText.textContent = "Tap Start Flow and follow the orb.";
+      instructionText.textContent = "Tap Start Flow and follow the light.";
       hintText.textContent = "Inhale through your nose, soft shoulders, relaxed jaw.";
+
+      circleProgress.style.strokeDashoffset = CIRCUMFERENCE;
+      updateCircleProgress(0);
+      circleBall.setAttribute("class", "circle-ball " + phaseBallClass["rest"]);
       if (clearProgress) sessionProgress.style.width = "0%";
     }
 
@@ -790,18 +768,17 @@
       running = true;
       statusLabel.textContent = "Breathing";
       startPauseBtn.textContent = "Pause";
+
       const level = levels[currentLevelIndex];
       totalCycles = level.cycles;
 
-      if (!phaseStartTime) {
-        cycleCount = 1;
+      if (currentCycle === 0) {
+        currentCycle = 1;
         currentPhase = "inhale";
         startPhase();
-      } else {
-        // resume
-        phaseStartTime = performance.now() - (elapsedInPhase * 1000);
-        animationFrameId = requestAnimationFrame(tick);
       }
+
+      timerIntervalId = setInterval(tickSecond, 1000);
     }
 
     function pauseSession() {
@@ -809,74 +786,71 @@
       running = false;
       startPauseBtn.textContent = "Resume";
       statusLabel.textContent = "Paused";
-      cancelAnimationFrame(animationFrameId);
+      if (timerIntervalId) clearInterval(timerIntervalId);
     }
-
-    let elapsedInPhase = 0;
 
     function startPhase() {
       const level = levels[currentLevelIndex];
       phaseDuration = level.pattern[currentPhase];
-      phaseStartTime = performance.now();
-      elapsedInPhase = 0;
+      phaseRemaining = phaseDuration;
 
-      // Visual state
-      breathOrb.className = "breath-orb " + phaseOrbClass[currentPhase];
       phaseLabelEl.textContent = phaseLabels[currentPhase] + " (" + phaseDuration + "s)";
       instructionText.textContent = phaseInstructions[currentPhase];
-      cycleIndicator.textContent = "Cycle " + cycleCount + " / " + level.cycles;
+      cycleIndicator.textContent = "Cycle " + currentCycle + " / " + level.cycles;
 
-      animationFrameId = requestAnimationFrame(tick);
+      circleBall.setAttribute("class", "circle-ball " + phaseBallClass[currentPhase]);
+      updateCircleProgress(0);
+      timerDisplay.textContent = phaseRemaining.toString();
     }
 
-    function tick(timestamp) {
+    function tickSecond() {
       if (!running) return;
 
-      if (!phaseStartTime) phaseStartTime = timestamp;
-      const delta = (timestamp - phaseStartTime) / 1000;
-      elapsedInPhase = delta;
-      sessionTotalTime += (1 / 60); // approx, corrected at end by using real time if needed
+      timerDisplay.textContent = phaseRemaining.toString();
 
-      // Update timer
-      const remaining = Math.max(0, phaseDuration - delta);
-      timerDisplay.textContent = remaining.toFixed(1) + "s";
+      const elapsedInPhase = phaseDuration - phaseRemaining;
+      const progress = phaseDuration > 0 ? elapsedInPhase / phaseDuration : 1;
+      updateCircleProgress(progress);
 
-      // Progress bar across whole session
       const level = levels[currentLevelIndex];
       const secondsPerCycle =
         level.pattern.inhale + level.pattern.hold + level.pattern.exhale + level.pattern.rest;
       const totalSessionSeconds = secondsPerCycle * level.cycles;
-      const totalElapsed = ((cycleCount - 1) * secondsPerCycle) + Math.min(delta, phaseDuration);
-      const pct = Math.min(100, (totalElapsed / totalSessionSeconds) * 100);
+      const elapsedWholeSession = (currentCycle - 1) * secondsPerCycle + elapsedInPhase;
+      const pct = Math.min(100, (elapsedWholeSession / totalSessionSeconds) * 100);
       sessionProgress.style.width = pct.toFixed(1) + "%";
 
-      if (delta >= phaseDuration) {
-        // Move to next phase
-        const currentIndex = phaseOrder.indexOf(currentPhase);
-        const lastPhase = currentIndex === phaseOrder.length - 1;
-        if (!lastPhase) {
-          currentPhase = phaseOrder[currentIndex + 1];
-          startPhase();
-        } else {
-          // End of cycle
-          if (cycleCount >= level.cycles) {
-            // complete session
-            completeSession();
-            return;
-          } else {
-            cycleCount += 1;
-            currentPhase = "inhale";
-            startPhase();
-          }
-        }
+      sessionTotalSeconds += 1;
+
+      if (phaseRemaining <= 0) {
+        advancePhaseOrCycle();
       } else {
-        animationFrameId = requestAnimationFrame(tick);
+        phaseRemaining -= 1;
+      }
+    }
+
+    function advancePhaseOrCycle() {
+      const currentIndex = phaseOrder.indexOf(currentPhase);
+      const lastPhase = currentIndex === phaseOrder.length - 1;
+
+      if (!lastPhase) {
+        currentPhase = phaseOrder[currentIndex + 1];
+        startPhase();
+      } else {
+        const level = levels[currentLevelIndex];
+        if (currentCycle >= level.cycles) {
+          completeSession();
+        } else {
+          currentCycle += 1;
+          currentPhase = "inhale";
+          startPhase();
+        }
       }
     }
 
     function completeSession() {
       running = false;
-      cancelAnimationFrame(animationFrameId);
+      if (timerIntervalId) clearInterval(timerIntervalId);
       sessionProgress.style.width = "100%";
       statusLabel.textContent = "Complete";
       startPauseBtn.textContent = "Restart";
@@ -885,19 +859,12 @@
       instructionText.textContent = "Level " + levels[currentLevelIndex].id + " complete. Enjoy the after-glow.";
       hintText.textContent = "When you’re ready, try another round or step up a level.";
 
-      // Use real elapsed estimate: total cycles * per-cycle seconds
-      const level = levels[currentLevelIndex];
-      const secondsPerCycle =
-        level.pattern.inhale + level.pattern.hold + level.pattern.exhale + level.pattern.rest;
-      sessionTotalTime = secondsPerCycle * level.cycles;
-
+      timerDisplay.textContent = "0";
       recordSession();
     }
 
-    // Button wiring
     startPauseBtn.addEventListener("click", () => {
       if (!running && sessionProgress.style.width === "100%") {
-        // Restart whole session
         resetSessionState(false);
         startSession();
         return;
@@ -914,10 +881,9 @@
     });
 
     // Init
-    renderLevels();
     loadStats();
+    renderLevels();
     resetSessionState(true);
   </script>
 </body>
 </html>
-
