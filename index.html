@@ -1,1 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Breath with KaKa</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-card: rgba(9, 12, 40, 0.9);
+      --primary: #00ffff;
+      --primary-soft: rgba(0, 255, 255, 0.25);
+      --accent: #ff2d95;
+      --accent2: #39ff14;
+      --accent3: #ffff33;
+      --text-main: #f7f7ff;
+      --text-muted: #b3b3d9;
+      --danger: #ff5f5f;
+      --success: #4dff88;
+      --shadow-glow: 0 0 25px rgba(0, 255, 255, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1a1b4b 0, #050816 45%, #020211 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.65);
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255, 45, 149, 0.15), rgba(0, 255, 255, 0.12));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.9);
+    }
+
+    /* Level selector */
+    .level-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .level-chip {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.78rem;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(10, 12, 40, 0.9);
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: pointer;
+      transition: all 0.18s ease-out;
+    }
+
+    .level-chip span:first-child {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .level-chip small {
+      font-size: 0.66rem;
+    }
+
+    .level-chip.active {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-glow);
+      background: radial-gradient(circle at top left, rgba(0, 255, 255, 0.23), rgba(10, 12, 40, 0.95));
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    /* Breathing area */
+    .breath-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .breath-card::before {
+      content: "";
+      position: absolute;
+      inset: -60%;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(0, 255, 255, 0.18), transparent 60%),
+        radial-gradient(circle at 80% 100%, rgba(255, 45, 149, 0.23), transparent 60%);
+      opacity: 0.8;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .breath-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Animated breathing orb + rings */
+    .breath-visual {
+      position: relative;
+      width: 210px;
+      height: 210px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .breath-orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffffff, #00ffff);
+      box-shadow:
+        0 0 30px rgba(0, 255, 255, 0.8),
+        0 0 60px rgba(255, 45, 149, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(1);
+      transition: transform 0.5s ease-out;
+    }
+
+    .orb-core {
+      width: 50%;
+      height: 50%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #050816 0, #050816 40%, rgba(5, 8, 22, 0) 100%);
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.8);
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      pointer-events: none;
+      animation: rotate 14s linear infinite;
+    }
+
+    .ring.r1 { width: 160px; height: 160px; border-color: rgba(0, 255, 255, 0.25); }
+    .ring.r2 { width: 190px; height: 190px; border-color: rgba(255, 45, 149, 0.35); animation-duration: 18s; }
+    .ring.r3 { width: 210px; height: 210px; border-color: rgba(57, 255, 20, 0.35); animation-duration: 22s; }
+
+    .ring::before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent3);
+      box-shadow: 0 0 18px rgba(255, 237, 0, 0.9);
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.9;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* State-based orb scaling (controlled via JS) */
+    .breath-orb.state-inhale {
+      transform: scale(1.12);
+    }
+    .breath-orb.state-hold {
+      transform: scale(1.18);
+    }
+    .breath-orb.state-exhale {
+      transform: scale(0.95);
+    }
+    .breath-orb.state-rest {
+      transform: scale(1.0);
+    }
+
+    .phase-label {
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 0.72rem;
+      color: var(--accent3);
+      margin-top: 4px;
+    }
+
+    .main-instruction {
+      font-size: 1.05rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 4px;
+    }
+
+    .timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-shadow: 0 0 13px rgba(0, 255, 255, 0.8);
+    }
+
+    .step-indicator {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 10px 22px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.03em;
+      transition: all 0.15s ease-out;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #050816;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.65);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-ghost:active {
+      transform: scale(0.97);
+    }
+
+    /* Progress dashboard */
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .dash-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .dash-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .stat {
+      flex: 1;
+      background: radial-gradient(circle at top, rgba(0, 255, 255, 0.16), rgba(9, 12, 40, 0.95));
+      border-radius: 14px;
+      padding: 8px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .stat-tag {
+      font-size: 0.68rem;
+      color: var(--accent2);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent2), var(--primary), var(--accent));
+      transition: width 0.2s linear;
+    }
+
+    .session-log {
+      margin-top: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+
+    .log-item {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .badge-level {
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(0, 255, 255, 0.12);
+      color: var(--primary);
+      font-size: 0.66rem;
+      margin-left: 4px;
+    }
+
+    /* Utility */
+    @media (max-width: 380px) {
+      .brand-title { font-size: 1.1rem; }
+      .breath-visual { width: 190px; height: 190px; }
+      .breath-orb { width: 108px; height: 108px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- HEADER + LEVELS -->
+    <div class="card">
+      <div class="header">
+        <div class="brand">
+          <div class="brand-title">Breath with KaKa</div>
+          <div class="brand-sub">Neon calm • Guided 4-level flow</div>
+        </div>
+        <div class="pill">
+          <span class="pill-dot"></span>
+          <span id="statusLabel">Idle</span>
+        </div>
+      </div>
+
+      <div class="level-row" id="levelRow">
+        <!-- Level chips populated by JS -->
+      </div>
+    </div>
+
+    <!-- BREATHING AREA -->
+    <div class="card breath-card">
+      <div class="breath-inner">
+        <div class="breath-visual">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+
+          <div class="breath-orb state-rest" id="breathOrb">
+            <div class="orb-core"></div>
+          </div>
+        </div>
+
+        <div class="phase-label" id="phaseLabel">Ready</div>
+        <div class="main-instruction" id="instructionText">
+          Tap Start Flow and follow the orb.
+        </div>
+
+        <div class="timer-row">
+          <div class="timer" id="timerDisplay">0.0s</div>
+          <div class="step-indicator" id="cycleIndicator">Cycle 0 / 0</div>
+        </div>
+
+        <div class="hint" id="hintText">
+          Inhale through your nose, soft shoulders, relaxed jaw.
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-primary" id="startPauseBtn">Start Flow</button>
+          <button class="btn btn-ghost" id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="card">
+      <div class="dash-header">
+        <div>
+          <div class="dash-title">KaKa Calm Dashboard</div>
+          <div class="dash-sub">Track your streak and total time</div>
+        </div>
+        <div class="dash-sub" id="todayLabel">Today: 0 sessions</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-label">Completed sessions</div>
+          <div class="stat-value" id="sessionsCount">0</div>
+          <div class="stat-tag">Keep showing up</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total breath time</div>
+          <div class="stat-value" id="totalMinutes">0.0 min</div>
+          <div class="stat-tag">Lifetime on this device</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Best streak</div>
+          <div class="stat-value" id="bestStreak">0 days</div>
+          <div class="stat-tag">Highest daily streak</div>
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="sessionProgress"></div>
+      </div>
+
+      <div class="session-log" id="sessionLog">
+        <!-- Recent sessions -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      Breathing levels:
+      Each level defines inhale / hold / exhale / rest (seconds) and cycles.
+      Level 1 uses your example: inhale 7, hold 4, exhale 7.
+    */
+    const levels = [
+      {
+        id: 1,
+        name: "Level 1 • Soft Start",
+        pattern: { inhale: 7, hold: 4, exhale: 7, rest: 4 },
+        cycles: 4,
+        description: "Inhale 7 • Hold 4 • Exhale 7 • Rest 4",
+      },
+      {
+        id: 2,
+        name: "Level 2 • KaKa Box",
+        pattern: { inhale: 4, hold: 4, exhale: 4, rest: 4 },
+        cycles: 6,
+        description: "Classic 4×4 box breathing",
+      },
+      {
+        id: 3,
+        name: "Level 3 • Deep Ocean",
+        pattern: { inhale: 6, hold: 6, exhale: 8, rest: 4 },
+        cycles: 5,
+        description: "Deeper, slower waves",
+      },
+      {
+        id: 4,
+        name: "Level 4 • Power Focus",
+        pattern: { inhale: 5, hold: 7, exhale: 8, rest: 5 },
+        cycles: 4,
+        description: "Longer holds for focus",
+      },
+    ];
+
+    const phaseOrder = ["inhale", "hold", "exhale", "rest"];
+
+    const phaseLabels = {
+      inhale: "Inhale",
+      hold: "Hold",
+      exhale: "Exhale",
+      rest: "Rest",
+    };
+
+    const phaseInstructions = {
+      inhale: "Breathe in slowly through your nose, belly expands.",
+      hold: "Hold gently, keep shoulders loose.",
+      exhale: "Breathe out like fogging a mirror, long and smooth.",
+      rest: "Soft pause, no forcing — just enjoy the stillness.",
+    };
+
+    const phaseOrbClass = {
+      inhale: "state-inhale",
+      hold: "state-hold",
+      exhale: "state-exhale",
+      rest: "state-rest",
+    };
+
+    const statusLabel = document.getElementById("statusLabel");
+    const levelRow = document.getElementById("levelRow");
+    const breathOrb = document.getElementById("breathOrb");
+    const phaseLabelEl = document.getElementById("phaseLabel");
+    const instructionText = document.getElementById("instructionText");
+    const hintText = document.getElementById("hintText");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const cycleIndicator = document.getElementById("cycleIndicator");
+    const startPauseBtn = document.getElementById("startPauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const sessionProgress = document.getElementById("sessionProgress");
+
+    const sessionsCountEl = document.getElementById("sessionsCount");
+    const totalMinutesEl = document.getElementById("totalMinutes");
+    const bestStreakEl = document.getElementById("bestStreak");
+    const sessionLog = document.getElementById("sessionLog");
+    const todayLabel = document.getElementById("todayLabel");
+
+    let currentLevelIndex = 0;
+    let currentPhase = "inhale";
+    let currentCycle = 0;
+    let phaseStartTime = null;
+    let phaseDuration = 0;
+    let cycleCount = 0;
+    let totalCycles = 0;
+    let sessionTotalTime = 0;
+    let animationFrameId = null;
+    let running = false;
+
+    // Dashboard state (localStorage-backed)
+    const STORAGE_KEY = "breathWithKakaStats_v1";
+
+    let stats = {
+      sessions: 0,
+      totalSeconds: 0,
+      bestStreak: 0,
+      streakLastDate: null,
+      recentSessions: [], // { dateISO, levelId, seconds }
+    };
+
+    function loadStats() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          stats = Object.assign(stats, parsed);
+        }
+      } catch (e) {
+        console.warn("Could not load stats", e);
+      }
+      renderStats();
+    }
+
+    function saveStats() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+      } catch (e) {
+        console.warn("Could not save stats", e);
+      }
+    }
+
+    function getTodayStr() {
+      const now = new Date();
+      return now.toISOString().slice(0, 10);
+    }
+
+    function updateStreak() {
+      const todayStr = getTodayStr();
+      const last = stats.streakLastDate;
+      if (!last) {
+        stats.bestStreak = 1;
+        stats.streakLastDate = todayStr;
+        return;
+      }
+      if (last === todayStr) {
+        // already counted today
+        return;
+      }
+      const lastDate = new Date(last);
+      const todayDate = new Date(todayStr);
+      const diffMs = todayDate - lastDate;
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        stats.bestStreak += 1;
+      } else {
+        stats.bestStreak = 1;
+      }
+      stats.streakLastDate = todayStr;
+    }
+
+    function renderStats() {
+      sessionsCountEl.textContent = stats.sessions;
+      totalMinutesEl.textContent = (stats.totalSeconds / 60).toFixed(1) + " min";
+      bestStreakEl.textContent = stats.bestStreak + (stats.bestStreak === 1 ? " day" : " days");
+
+      // Today count
+      const todayStr = getTodayStr();
+      const todaySessions = stats.recentSessions.filter(s => s.dateISO.slice(0, 10) === todayStr).length;
+      todayLabel.textContent = "Today: " + todaySessions + " session" + (todaySessions === 1 ? "" : "s");
+
+      // Log
+      sessionLog.innerHTML = "";
+      if (stats.recentSessions.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "log-item";
+        empty.textContent = "No sessions yet. Your KaKa calm journey starts now.";
+        sessionLog.appendChild(empty);
+        return;
+      }
+
+      const recent = [...stats.recentSessions].slice(-8).reverse();
+      for (const item of recent) {
+        const row = document.createElement("div");
+        row.className = "log-item";
+
+        const dt = new Date(item.dateISO);
+        const timeStr = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const level = levels.find(l => l.id === item.levelId);
+        const levelName = level ? "L" + level.id : "Lv?";
+
+        row.innerHTML =
+          timeStr + " • " +
+          (item.seconds / 60).toFixed(1) + " min" +
+          `<span class="badge-level">${levelName}</span>`;
+        sessionLog.appendChild(row);
+      }
+    }
+
+    function recordSession() {
+      stats.sessions += 1;
+      stats.totalSeconds += Math.round(sessionTotalTime);
+      stats.recentSessions.push({
+        dateISO: new Date().toISOString(),
+        levelId: levels[currentLevelIndex].id,
+        seconds: sessionTotalTime,
+      });
+      updateStreak();
+      saveStats();
+      renderStats();
+    }
+
+    /* Level UI */
+    function renderLevels() {
+      levelRow.innerHTML = "";
+      levels.forEach((level, idx) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "level-chip" + (idx === currentLevelIndex ? " active" : "");
+        chip.dataset.index = idx;
+        chip.innerHTML =
+          `<span>L${level.id} • ${level.pattern.inhale}/${level.pattern.hold}/${level.pattern.exhale}/${level.pattern.rest}</span>` +
+          `<small>${level.description}</small>`;
+        chip.addEventListener("click", () => {
+          if (running) return; // don't change while running
+          currentLevelIndex = idx;
+          updateLevelActive();
+          resetSessionState(false);
+        });
+        levelRow.appendChild(chip);
+      });
+    }
+
+    function updateLevelActive() {
+      const chips = levelRow.querySelectorAll(".level-chip");
+      chips.forEach(chip => {
+        const idx = parseInt(chip.dataset.index, 10);
+        chip.classList.toggle("active", idx === currentLevelIndex);
+      });
+    }
+
+    /* Session logic */
+    function resetSessionState(clearProgress = true) {
+      cancelAnimationFrame(animationFrameId);
+      running = false;
+      startPauseBtn.textContent = "Start Flow";
+      statusLabel.textContent = "Idle";
+      breathOrb.className = "breath-orb state-rest";
+
+      const level = levels[currentLevelIndex];
+      cycleCount = 0;
+      totalCycles = level.cycles;
+      currentPhase = "inhale";
+      phaseStartTime = null;
+      phaseDuration = 0;
+      sessionTotalTime = 0;
+
+      timerDisplay.textContent = "0.0s";
+      cycleIndicator.textContent = "Cycle 0 / " + level.cycles;
+      phaseLabelEl.textContent = "Ready";
+      instructionText.textContent = "Tap Start Flow and follow the orb.";
+      hintText.textContent = "Inhale through your nose, soft shoulders, relaxed jaw.";
+      if (clearProgress) sessionProgress.style.width = "0%";
+    }
+
+    function startSession() {
+      if (running) return;
+      running = true;
+      statusLabel.textContent = "Breathing";
+      startPauseBtn.textContent = "Pause";
+      const level = levels[currentLevelIndex];
+      totalCycles = level.cycles;
+
+      if (!phaseStartTime) {
+        cycleCount = 1;
+        currentPhase = "inhale";
+        startPhase();
+      } else {
+        // resume
+        phaseStartTime = performance.now() - (elapsedInPhase * 1000);
+        animationFrameId = requestAnimationFrame(tick);
+      }
+    }
+
+    function pauseSession() {
+      if (!running) return;
+      running = false;
+      startPauseBtn.textContent = "Resume";
+      statusLabel.textContent = "Paused";
+      cancelAnimationFrame(animationFrameId);
+    }
+
+    let elapsedInPhase = 0;
+
+    function startPhase() {
+      const level = levels[currentLevelIndex];
+      phaseDuration = level.pattern[currentPhase];
+      phaseStartTime = performance.now();
+      elapsedInPhase = 0;
+
+      // Visual state
+      breathOrb.className = "breath-orb " + phaseOrbClass[currentPhase];
+      phaseLabelEl.textContent = phaseLabels[currentPhase] + " (" + phaseDuration + "s)";
+      instructionText.textContent = phaseInstructions[currentPhase];
+      cycleIndicator.textContent = "Cycle " + cycleCount + " / " + level.cycles;
+
+      animationFrameId = requestAnimationFrame(tick);
+    }
+
+    function tick(timestamp) {
+      if (!running) return;
+
+      if (!phaseStartTime) phaseStartTime = timestamp;
+      const delta = (timestamp - phaseStartTime) / 1000;
+      elapsedInPhase = delta;
+      sessionTotalTime += (1 / 60); // approx, corrected at end by using real time if needed
+
+      // Update timer
+      const remaining = Math.max(0, phaseDuration - delta);
+      timerDisplay.textContent = remaining.toFixed(1) + "s";
+
+      // Progress bar across whole session
+      const level = levels[currentLevelIndex];
+      const secondsPerCycle =
+        level.pattern.inhale + level.pattern.hold + level.pattern.exhale + level.pattern.rest;
+      const totalSessionSeconds = secondsPerCycle * level.cycles;
+      const totalElapsed = ((cycleCount - 1) * secondsPerCycle) + Math.min(delta, phaseDuration);
+      const pct = Math.min(100, (totalElapsed / totalSessionSeconds) * 100);
+      sessionProgress.style.width = pct.toFixed(1) + "%";
+
+      if (delta >= phaseDuration) {
+        // Move to next phase
+        const currentIndex = phaseOrder.indexOf(currentPhase);
+        const lastPhase = currentIndex === phaseOrder.length - 1;
+        if (!lastPhase) {
+          currentPhase = phaseOrder[currentIndex + 1];
+          startPhase();
+        } else {
+          // End of cycle
+          if (cycleCount >= level.cycles) {
+            // complete session
+            completeSession();
+            return;
+          } else {
+            cycleCount += 1;
+            currentPhase = "inhale";
+            startPhase();
+          }
+        }
+      } else {
+        animationFrameId = requestAnimationFrame(tick);
+      }
+    }
+
+    function completeSession() {
+      running = false;
+      cancelAnimationFrame(animationFrameId);
+      sessionProgress.style.width = "100%";
+      statusLabel.textContent = "Complete";
+      startPauseBtn.textContent = "Restart";
+
+      phaseLabelEl.textContent = "Nice work";
+      instructionText.textContent = "Level " + levels[currentLevelIndex].id + " complete. Enjoy the after-glow.";
+      hintText.textContent = "When you’re ready, try another round or step up a level.";
+
+      // Use real elapsed estimate: total cycles * per-cycle seconds
+      const level = levels[currentLevelIndex];
+      const secondsPerCycle =
+        level.pattern.inhale + level.pattern.hold + level.pattern.exhale + level.pattern.rest;
+      sessionTotalTime = secondsPerCycle * level.cycles;
+
+      recordSession();
+    }
+
+    // Button wiring
+    startPauseBtn.addEventListener("click", () => {
+      if (!running && sessionProgress.style.width === "100%") {
+        // Restart whole session
+        resetSessionState(false);
+        startSession();
+        return;
+      }
+      if (!running) {
+        startSession();
+      } else {
+        pauseSession();
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      resetSessionState(true);
+    });
+
+    // Init
+    renderLevels();
+    loadStats();
+    resetSessionState(true);
+  </script>
+</body>
+</html>
 
