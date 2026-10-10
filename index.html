@@ -1,883 +1,640 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Breath with KaKa</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kaka Destakee Punishment Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0524;
+    --pink:#ff3fa4; --cyan:#27e6ff; --lime:#b6ff3b; --gold:#ffcf3a; --violet:#8a4bff; --orange:#ff7a2f;
+    --ink:#1a0b3a;
+    --display:'Unbounded','Arial Black','Impact',system-ui,sans-serif;
+    --body:'Outfit','Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:var(--body);font-weight:500;color:#fff;background:var(--bg);
+    overflow-x:hidden;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+  }
 
-  <style>
-    :root {
-      --bg: #050816;
-      --bg-card: rgba(9, 12, 40, 0.9);
-      --primary: #00ffff;
-      --primary-soft: rgba(0, 255, 255, 0.25);
-      --accent: #ff2d95;
-      --accent2: #39ff14;
-      --accent3: #ffff33;
-      --text-main: #f7f7ff;
-      --text-muted: #b3b3d9;
-      --danger: #ff5f5f;
-      --success: #4dff88;
-      --shadow-glow: 0 0 25px rgba(0, 255, 255, 0.45);
-    }
+  /* ---------- Scenery ---------- */
+  .orbs{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(40vmax 40vmax at 10% 0%, rgba(255,63,164,.55), transparent 60%),
+      radial-gradient(45vmax 45vmax at 100% 15%, rgba(39,230,255,.40), transparent 60%),
+      radial-gradient(50vmax 50vmax at 50% 100%, rgba(138,75,255,.55), transparent 60%);}
+  .floor{position:fixed;left:-60%;right:-60%;bottom:0;height:60vh;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,63,164,.55) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(39,230,255,.5) 2px, transparent 2px);
+    background-size:64px 64px;
+    transform:perspective(520px) rotateX(64deg);transform-origin:50% 100%;
+    -webkit-mask-image:linear-gradient(to top,#000 0,transparent 90%);mask-image:linear-gradient(to top,#000 0,transparent 90%);
+    animation:floor 2.4s linear infinite;}
+  @keyframes floor{to{background-position:0 64px}}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+  .wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:22px 16px 48px}
 
-    body {
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1a1b4b 0, #050816 45%, #020211 100%);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      padding: 16px;
-    }
+  /* ---------- Brand ---------- */
+  header{text-align:center;margin:6px 0 26px;perspective:700px}
+  .brand{transform:rotateX(14deg) rotateZ(-2deg);transform-style:preserve-3d;display:inline-block}
+  .kaka{
+    display:block;font-family:var(--display);font-weight:900;line-height:.95;
+    font-size:clamp(3.4rem,17vw,5.6rem);letter-spacing:-.02em;color:var(--gold);
+    text-shadow:
+      0 1px 0 #f0a800, 0 2px 0 #e69a00, 0 3px 0 #d98c00, 0 4px 0 #cc7e00, 0 5px 0 #bf7000,
+      0 6px 0 #b26200, 0 7px 0 #a55400, 0 8px 0 #984600, 0 9px 0 #8b3800,
+      0 14px 18px rgba(0,0,0,.55), 0 0 40px rgba(255,207,58,.45);
+  }
+  .sub{
+    display:block;margin-top:12px;font-family:var(--display);font-weight:900;text-transform:uppercase;
+    font-size:clamp(1.05rem,5.4vw,1.7rem);line-height:1.08;color:#fff;letter-spacing:.01em;
+    text-shadow:
+      0 1px 0 var(--pink), 0 2px 0 #e82f93, 0 3px 0 #d12082, 0 4px 0 #b91471, 0 5px 0 #a00a60,
+      0 6px 0 #880050, 0 10px 14px rgba(0,0,0,.55);
+  }
+  .tag{display:inline-block;margin-top:18px;padding:6px 14px;border-radius:99px;font-weight:800;font-size:.85rem;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 
-    .app {
-      width: 100%;
-      max-width: 480px;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+  h2{font-family:var(--display);font-weight:700;font-size:clamp(1.1rem,5vw,1.45rem);text-align:center;margin-bottom:20px;line-height:1.25;
+     text-shadow:0 3px 0 rgba(0,0,0,.35)}
 
-    .card {
-      background: var(--bg-card);
-      border-radius: 18px;
-      padding: 14px 16px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(16px);
-    }
+  .screen{display:none}
+  .screen.active{display:block}
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
+  /* ---------- 3D Tiles ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px;perspective:1000px}
+  .tile{
+    --rx:0deg;--ry:0deg;--mx:50%;--my:30%;
+    position:relative;border:0;background:none;cursor:pointer;color:#fff;font-family:var(--body);
+    aspect-ratio:1/1.12;perspective:700px;-webkit-tap-highlight-color:transparent;
+  }
+  .tile:nth-child(5){grid-column:1 / -1;width:calc(50% - 9px);justify-self:center}
+  .tile:focus-visible{outline:3px solid #fff;outline-offset:6px;border-radius:26px}
+  .t-inner{position:absolute;inset:0;display:block;transform-style:preserve-3d;
+    transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .25s ease-out}
+  .tile.live .t-inner{transition:transform .06s linear}
+  .slab{position:absolute;inset:0;display:block;border-radius:26px;background:var(--dark);transform:translateZ(-22px);
+    box-shadow:0 30px 40px rgba(0,0,0,.55)}
+  .slab2{position:absolute;inset:0;display:block;border-radius:26px;background:var(--dark);transform:translateZ(-11px)}
+  .face{position:absolute;inset:0;display:block;border-radius:26px;
+    background:
+      radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.55), transparent 42%),
+      linear-gradient(150deg,var(--a),var(--b));
+    border:2px solid rgba(255,255,255,.55);
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.55), inset 0 -10px 24px rgba(0,0,0,.25);
+    overflow:hidden}
+  .face::after{content:"";position:absolute;left:-20%;right:-20%;top:-60%;height:100%;
+    background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);transform:rotate(-8deg);border-radius:50%}
+  .icon{position:absolute;left:0;right:0;top:12%;height:58%;display:grid;place-items:center;transform:translateZ(64px);
+    filter:drop-shadow(0 18px 10px rgba(0,0,0,.45));font-size:clamp(3.6rem,18vw,5.6rem);line-height:1}
+  .icon svg{width:78%;height:auto}
+  .label{position:absolute;left:8px;right:8px;bottom:12px;display:block;text-align:center;
+    font-family:var(--display);font-weight:700;font-size:.85rem;color:#fff;transform:translateZ(36px);
+    text-shadow:0 2px 0 rgba(0,0,0,.35);letter-spacing:.01em}
+  .tile:nth-child(1){--a:#ffd23f;--b:#ff8a1f;--dark:#a04a00}
+  .tile:nth-child(2){--a:#27e6ff;--b:#2f6bff;--dark:#0e2a8a}
+  .tile:nth-child(3){--a:#ff63b8;--b:#9b3dff;--dark:#52148f}
+  .tile:nth-child(4){--a:#b6ff3b;--b:#16c46a;--dark:#0a6a36}
+  .tile:nth-child(5){--a:#6aa8ff;--b:#6a35ff;--dark:#2a1580}
+  @media (prefers-reduced-motion:no-preference){
+    .icon{animation:bob 3s ease-in-out infinite}
+    .tile:nth-child(2) .icon{animation-delay:-.6s}.tile:nth-child(3) .icon{animation-delay:-1.2s}
+    .tile:nth-child(4) .icon{animation-delay:-1.8s}.tile:nth-child(5) .icon{animation-delay:-2.4s}
+  }
+  @keyframes bob{50%{transform:translateZ(64px) translateY(-8px)}}
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+  /* ---------- Glass panel ---------- */
+  .panel{
+    position:relative;text-align:center;padding:26px 18px 28px;border-radius:30px;
+    background:linear-gradient(160deg,rgba(255,255,255,.2),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.4);
+    box-shadow:0 30px 60px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.5);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  }
+  .pedestal{width:130px;height:130px;margin:-64px auto 14px;border-radius:30px;display:grid;place-items:center;font-size:4.4rem;
+    background:linear-gradient(150deg,var(--a,#ffd23f),var(--b,#ff8a1f));
+    border:2px solid rgba(255,255,255,.6);
+    box-shadow:0 8px 0 var(--dark,#a04a00), 0 20px 24px rgba(0,0,0,.5), inset 0 3px 0 rgba(255,255,255,.55);
+    transform:rotateX(14deg) rotateY(-10deg);}
+  .pedestal svg{width:80%;height:auto}
+  .prompt{font-family:var(--display);font-weight:700;font-size:1.15rem;line-height:1.3;margin-bottom:16px}
+  input[type=number]{
+    width:100%;font:800 2.6rem var(--body);text-align:center;color:#fff;background:rgba(10,3,36,.65);
+    border:2px solid rgba(255,255,255,.35);border-radius:20px;padding:12px;outline:none;
+    box-shadow:inset 0 6px 14px rgba(0,0,0,.5);caret-color:var(--cyan);
+  }
+  input[type=number]::placeholder{color:rgba(255,255,255,.3)}
+  input[type=number]:focus{border-color:var(--cyan);box-shadow:inset 0 6px 14px rgba(0,0,0,.5),0 0 0 4px rgba(39,230,255,.35),0 0 30px rgba(39,230,255,.5)}
+  .hint{font-weight:700;font-size:.9rem;margin-top:10px;min-height:1.3em;color:var(--gold)}
 
-    .brand-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      color: var(--primary);
-      text-shadow: 0 0 10px rgba(0, 255, 255, 0.65);
-    }
+  /* ---------- 3D buttons ---------- */
+  .btn{
+    display:inline-block;margin-top:18px;font-family:var(--display);font-weight:900;font-size:1rem;color:#fff;cursor:pointer;
+    padding:15px 30px;border-radius:18px;border:2px solid rgba(255,255,255,.6);
+    background:linear-gradient(180deg,#ff6cc0,var(--pink));
+    box-shadow:0 8px 0 #9d1566, 0 16px 22px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,255,255,.6);
+    transition:transform .08s, box-shadow .08s;text-shadow:0 2px 0 rgba(0,0,0,.3);
+  }
+  .btn:active{transform:translateY(7px);box-shadow:0 1px 0 #9d1566, 0 4px 8px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.6)}
+  .btn:focus-visible{outline:3px solid #fff;outline-offset:4px}
+  .btn.cyan{background:linear-gradient(180deg,#7df2ff,var(--cyan));color:var(--ink);text-shadow:none;box-shadow:0 8px 0 #0f93a6, 0 16px 22px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,255,255,.7)}
+  .btn.cyan:active{box-shadow:0 1px 0 #0f93a6, 0 4px 8px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.7)}
+  .back{background:none;border:0;color:#fff;font:700 .95rem var(--body);cursor:pointer;margin:0 0 56px;opacity:.85;text-decoration:underline;text-underline-offset:4px}
+  .back:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 
-    .brand-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
+  /* ---------- Mystery box (real 3D) ---------- */
+  .mystery{text-align:center}
+  .stage{position:relative;width:min(84vw,330px);height:340px;margin:0 auto;perspective:900px;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+  .stage:focus-visible .shadowfloor{box-shadow:0 0 0 4px #fff}
+  .tilt{position:absolute;left:50%;top:56%;width:0;height:0;transform-style:preserve-3d;transform:rotateX(-26deg)}
+  .stage.wiggle .tilt{animation:wig 2.6s ease-in-out infinite}
+  @keyframes wig{0%,55%,100%{transform:rotateX(-26deg) translateY(0)}
+    62%{transform:rotateX(-26deg) translateY(-12px) rotateZ(-4deg)}
+    70%{transform:rotateX(-26deg) translateY(0) rotateZ(4deg)}
+    78%{transform:rotateX(-26deg) translateY(-6px) rotateZ(-3deg)}
+    86%{transform:rotateX(-26deg) translateY(0) rotateZ(2deg)}}
+  .spinner{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+  .shadowfloor{position:absolute;left:50%;bottom:22px;width:230px;height:46px;margin-left:-115px;border-radius:50%;
+    background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 70%);filter:blur(4px)}
+  .body{position:absolute;left:-85px;top:-60px;width:170px;height:120px;transform-style:preserve-3d}
+  .bf{position:absolute;display:block;overflow:hidden;
+    border:2px solid rgba(255,255,255,.35);
+    background:
+      linear-gradient(0deg,transparent 14%,var(--gold) 14% 30%,transparent 30%),
+      linear-gradient(160deg,var(--c1),var(--c2));}
+  .bf.front{width:170px;height:120px;transform:translateZ(85px);--c1:#a778ff;--c2:#6b2fe0}
+  .bf.back{width:170px;height:120px;transform:rotateY(180deg) translateZ(85px);--c1:#7a3df0;--c2:#4a1fb5}
+  .bf.right{width:170px;height:120px;transform:rotateY(90deg) translateZ(85px);--c1:#6a2fe0;--c2:#3f1a9c}
+  .bf.left{width:170px;height:120px;transform:rotateY(-90deg) translateZ(85px);--c1:#8f58ff;--c2:#5a28cc}
+  .bf.bottom{width:170px;height:170px;top:-25px;transform:rotateX(-90deg) translateZ(60px);--c1:#2a0f66;--c2:#1a0b3a;background:#1a0b3a}
+  .bf.glow{width:150px;height:150px;left:10px;top:-15px;transform:rotateX(90deg) translateZ(54px);border:0;
+    background:radial-gradient(circle,#fff 0,var(--gold) 30%,var(--pink) 65%,#3a0a5a 100%);opacity:.0;transition:opacity .4s}
+  .stage.opened .bf.glow{opacity:1}
+  .q{position:absolute;left:0;right:0;top:4px;text-align:center;font-family:var(--display);font-weight:900;font-size:64px;line-height:1;color:#fff;
+     text-shadow:0 4px 0 #2a0f66,0 8px 10px rgba(0,0,0,.4)}
+  .lid{position:absolute;left:-92px;top:-94px;width:184px;height:34px;transform-style:preserve-3d;
+    transform-origin:50% 100% -92px;transition:transform .9s cubic-bezier(.2,1.5,.35,1)}
+  .stage.opened .lid{transform:rotateX(112deg)}
+  .lf{position:absolute;display:block;border:2px solid rgba(255,255,255,.4);
+    background:linear-gradient(90deg,transparent 41%,var(--gold) 41% 59%,transparent 59%),linear-gradient(160deg,var(--l1),var(--l2))}
+  .lf.front{width:184px;height:34px;transform:translateZ(92px);--l1:#ff7fc3;--l2:#ff2f95}
+  .lf.back{width:184px;height:34px;transform:rotateY(180deg) translateZ(92px);--l1:#e02a88;--l2:#c01a70}
+  .lf.right{width:184px;height:34px;transform:rotateY(90deg) translateZ(92px);--l1:#d8247f;--l2:#b01468}
+  .lf.left{width:184px;height:34px;transform:rotateY(-90deg) translateZ(92px);--l1:#ff63b8;--l2:#e02a88}
+  .lf.top{width:184px;height:184px;top:-75px;transform:rotateX(90deg) translateZ(17px);--l1:#ff9ad6;--l2:#ff3fa4;
+    background:
+      linear-gradient(90deg,transparent 41%,var(--gold) 41% 59%,transparent 59%),
+      linear-gradient(0deg,transparent 41%,var(--gold) 41% 59%,transparent 59%),
+      linear-gradient(160deg,var(--l1),var(--l2))}
+  .lf.under{width:184px;height:184px;top:-75px;transform:rotateX(-90deg) translateZ(17px);background:#8a1a5a}
+  .beam{position:absolute;left:50%;top:-20px;width:240px;height:260px;margin-left:-120px;pointer-events:none;opacity:0;
+    background:linear-gradient(to top,rgba(255,236,150,.85),rgba(255,236,150,0));
+    clip-path:polygon(38% 100%,62% 100%,100% 0,0 0);transition:opacity .5s;filter:blur(2px)}
+  .stage.opened .beam{opacity:1}
+  .tap{display:inline-flex;align-items:center;gap:12px;margin-top:10px;padding:14px 22px;border-radius:99px;
+    font-family:var(--display);font-weight:700;font-size:.95rem;line-height:1.2;
+    background:linear-gradient(180deg,#ffe27a,var(--gold));color:var(--ink);border:2px solid rgba(255,255,255,.7);
+    box-shadow:0 7px 0 #b88700,0 14px 20px rgba(0,0,0,.45);cursor:pointer}
+  .finger{display:inline-block;font-size:1.8rem;animation:poke 1s ease-in-out infinite}
+  @keyframes poke{0%,100%{transform:translateY(0) rotate(-12deg)}50%{transform:translateY(-10px) rotate(-12deg)}}
 
-    .pill {
-      font-size: 0.7rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, rgba(255, 45, 149, 0.15), rgba(0, 255, 255, 0.12));
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-main);
-      white-space: nowrap;
-    }
+  /* ---------- Result ---------- */
+  .stage3d{perspective:1100px}
+  .rcard{
+    --rc:var(--cyan);
+    position:relative;text-align:center;padding:24px 18px 28px;border-radius:32px;
+    background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.05));
+    border:1px solid rgba(255,255,255,.45);
+    box-shadow:0 36px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05), inset 0 2px 0 rgba(255,255,255,.55), 0 0 60px color-mix(in srgb,var(--rc) 40%,transparent);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    transform-origin:50% 100%;
+  }
+  .rcard.enter{animation:flipin .9s cubic-bezier(.2,1.2,.3,1) both}
+  @keyframes flipin{from{transform:rotateX(-70deg) translateY(60px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+  .resline{font-weight:700;font-size:.95rem;opacity:.9}
+  .score{font-family:var(--display);font-weight:900;line-height:1;font-size:clamp(6rem,36vw,9.5rem);color:var(--rc);margin:10px 0 4px;
+    text-shadow:
+      0 2px 0 var(--ink),0 4px 0 var(--ink),0 6px 0 var(--ink),0 8px 0 var(--ink),0 10px 0 var(--ink),0 12px 0 var(--ink),
+      0 22px 26px rgba(0,0,0,.6),0 0 50px color-mix(in srgb,var(--rc) 70%,transparent);
+    transform:perspective(500px) rotateX(10deg)}
+  .score small{font-size:.24em;color:#fff;text-shadow:0 3px 0 var(--ink)}
+  .meter{height:20px;border-radius:99px;background:rgba(10,3,36,.7);border:2px solid rgba(255,255,255,.35);overflow:hidden;margin:14px 6px 4px;box-shadow:inset 0 4px 8px rgba(0,0,0,.6)}
+  .meter i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 60%,#fff),var(--rc));
+    box-shadow:0 0 16px var(--rc);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+  .mlab{display:flex;justify-content:space-between;font-weight:800;font-size:.78rem;opacity:.8;margin:0 8px}
+  .verdict{font-family:var(--display);font-weight:900;font-size:clamp(1.15rem,5.4vw,1.5rem);line-height:1.2;margin:18px 0 10px;
+    text-shadow:0 3px 0 rgba(0,0,0,.4)}
+  .dx{display:inline-block;margin-bottom:14px;padding:8px 14px;border-radius:12px;font-weight:800;font-size:.88rem;line-height:1.3;
+    background:rgba(10,3,36,.6);border:1px dashed color-mix(in srgb,var(--rc) 80%,#fff);text-align:left}
+  .dx b{color:var(--rc)}
+  .bubble{position:relative;text-align:left;font-weight:700;font-size:1.04rem;line-height:1.5;padding:16px 16px 16px;margin-top:6px;border-radius:20px;
+    background:rgba(255,255,255,.95);color:var(--ink);box-shadow:0 8px 0 rgba(0,0,0,.25)}
+  .bubble::before{content:"";position:absolute;top:-12px;left:34px;border:12px solid transparent;border-top:0;border-bottom-color:rgba(255,255,255,.95)}
+  .who{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.82rem;margin:0 0 8px;color:#7a2fd8}
+  .who span{font-size:1.5rem}
+  .emojis{font-size:2rem;margin-top:16px;letter-spacing:6px}
+  .fine{margin-top:26px;text-align:center;font-weight:700;font-size:.8rem;opacity:.65}
 
-    .pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent2);
-      box-shadow: 0 0 10px rgba(57, 255, 20, 0.9);
-    }
-
-    /* Level selector */
-    .level-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-
-    .level-chip {
-      flex: 1;
-      min-width: 0;
-      font-size: 0.78rem;
-      padding: 6px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(10, 12, 40, 0.9);
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      cursor: pointer;
-      transition: all 0.18s ease-out;
-    }
-
-    .level-chip span:first-child {
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .level-chip small {
-      font-size: 0.66rem;
-    }
-
-    .level-chip.active {
-      border-color: var(--primary);
-      box-shadow: var(--shadow-glow);
-      background: radial-gradient(circle at top left, rgba(0, 255, 255, 0.23), rgba(10, 12, 40, 0.95));
-      color: var(--text-main);
-      transform: translateY(-1px);
-    }
-
-    /* Breathing area */
-    .breath-card {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .breath-card::before {
-      content: "";
-      position: absolute;
-      inset: -60%;
-      background:
-        radial-gradient(circle at 20% 0%, rgba(0, 255, 255, 0.18), transparent 60%),
-        radial-gradient(circle at 80% 100%, rgba(255, 45, 149, 0.23), transparent 60%);
-      opacity: 0.8;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .breath-inner {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    /* SVG breathing visual */
-    .breath-visual {
-      position: relative;
-      width: 220px;
-      height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .breath-svg {
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
-    }
-
-    .circle-track {
-      fill: none;
-      stroke: rgba(255, 255, 255, 0.08);
-      stroke-width: 10;
-    }
-
-    .circle-progress {
-      fill: none;
-      stroke: var(--primary);
-      stroke-width: 10;
-      stroke-linecap: round;
-      stroke-dasharray: 0;
-      stroke-dashoffset: 0;
-      filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.8));
-      transition: stroke 0.25s ease;
-    }
-
-    .circle-ball {
-      fill: #ffffff;
-      filter:
-        drop-shadow(0 0 12px rgba(0, 255, 255, 0.9))
-        drop-shadow(0 0 20px rgba(255, 45, 149, 0.8));
-      transition: r 0.3s ease;
-    }
-
-    .circle-ball.state-inhale { r: 8; }
-    .circle-ball.state-hold   { r: 10; }
-    .circle-ball.state-exhale { r: 6; }
-    .circle-ball.state-rest   { r: 5; }
-
-    .phase-label {
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      font-size: 0.72rem;
-      color: var(--accent3);
-      margin-top: 4px;
-    }
-
-    .main-instruction {
-      font-size: 1.05rem;
-      text-align: center;
-      font-weight: 500;
-      white-space: pre-line;
-    }
-
-    .timer-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      margin-top: 4px;
-    }
-
-    .timer {
-      font-variant-numeric: tabular-nums;
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--primary);
-      text-shadow: 0 0 13px rgba(0, 255, 255, 0.8);
-    }
-
-    .step-indicator {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .hint {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-align: center;
-      margin-top: 6px;
-    }
-
-    /* Controls */
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border-radius: 999px;
-      padding: 10px 22px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: 0.03em;
-      transition: all 0.15s ease-out;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: #050816;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.65);
-    }
-
-    .btn-primary:active {
-      transform: scale(0.97);
-      box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-
-    .btn-ghost:active {
-      transform: scale(0.97);
-    }
-
-    /* Progress dashboard */
-    .dash-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .dash-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .dash-sub {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-    }
-
-    .stats-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .stat {
-      flex: 1;
-      background: radial-gradient(circle at top, rgba(0, 255, 255, 0.16), rgba(9, 12, 40, 0.95));
-      border-radius: 14px;
-      padding: 8px 9px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    .stat-value {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .stat-tag {
-      font-size: 0.68rem;
-      color: var(--accent2);
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent2), var(--primary), var(--accent));
-      transition: width 0.2s linear;
-    }
-
-    .session-log {
-      margin-top: 10px;
-      max-height: 120px;
-      overflow-y: auto;
-      padding-right: 4px;
-      scrollbar-width: thin;
-    }
-
-    .log-item {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      padding: 4px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    .log-item:last-child {
-      border-bottom: none;
-    }
-
-    .badge-level {
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: rgba(0, 255, 255, 0.12);
-      color: var(--primary);
-      font-size: 0.66rem;
-      margin-left: 4px;
-    }
-
-    @media (max-width: 380px) {
-      .brand-title { font-size: 1.1rem; }
-      .breath-visual { width: 190px; height: 190px; }
-    }
-  </style>
+  /* confetti */
+  .confetti{position:fixed;top:-30px;z-index:50;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(112vh) rotate(720deg)}}
+  @media (prefers-reduced-motion:reduce){.floor,.finger,.stage.wiggle .tilt{animation:none}.confetti{display:none}.rcard.enter{animation:none}}
+</style>
 </head>
 <body>
-  <div class="app">
-    <!-- HEADER + LEVELS -->
-    <div class="card">
-      <div class="header">
-        <div class="brand">
-          <div class="brand-title">Breath with KaKa</div>
-          <div class="brand-sub">Neon calm • Guided 4-level flow</div>
-        </div>
-        <div class="pill">
-          <span class="pill-dot"></span>
-          <span id="statusLabel">Idle</span>
-        </div>
-      </div>
+<div class="orbs" aria-hidden="true"></div>
+<div class="floor" aria-hidden="true"></div>
 
-      <div class="level-row" id="levelRow"></div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="kaka">KAKA</span>
+      <span class="sub">Destakee Punishment Calculator</span>
     </div>
+    <div><span class="tag">Adults only. Judgment included.</span></div>
+  </header>
 
-    <!-- BREATHING AREA -->
-    <div class="card breath-card">
-      <div class="breath-inner">
-        <div class="breath-visual">
-          <svg class="breath-svg" viewBox="0 0 200 200">
-            <circle class="circle-track" cx="100" cy="100" r="70"></circle>
-            <circle class="circle-progress" id="circleProgress" cx="100" cy="100" r="70"></circle>
-            <circle class="circle-ball state-rest" id="circleBall" cx="100" cy="30" r="5"></circle>
-          </svg>
-        </div>
+  <!-- 1. SELECT -->
+  <section id="s-select" class="screen active">
+    <h2>Select your Destakee helper</h2>
+    <div class="grid" id="grid"></div>
+  </section>
 
-        <div class="phase-label" id="phaseLabel">READY</div>
-        <div class="main-instruction" id="instructionText">
-Tap Start Flow and follow the light.
-        </div>
+  <!-- 2. COUNT -->
+  <section id="s-count" class="screen">
+    <button class="back" id="back1">&larr; Pick a different helper</button>
+    <div class="panel">
+      <div class="pedestal" id="chosen"></div>
+      <div class="prompt">Enter number of times you did Destakee with this object</div>
+      <input type="number" id="countInput" inputmode="numeric" min="0" max="9999" placeholder="0" aria-label="Number of times">
+      <div class="hint" id="hint"></div>
+      <button class="btn" id="go">Lock it in</button>
+    </div>
+  </section>
 
-        <div class="timer-row">
-          <div class="timer" id="timerDisplay">0</div>
-          <div class="step-indicator" id="cycleIndicator">Cycle 0 / 0</div>
-        </div>
-
-        <div class="hint" id="hintText">
-          When the light moves, INHALE; when it freezes, HOLD; when it keeps moving, EX-HALE.
-        </div>
-
-        <div class="controls">
-          <button class="btn btn-primary" id="startPauseBtn">Start Flow</button>
-          <button class="btn btn-ghost" id="resetBtn">Reset</button>
+  <!-- 3. MYSTERY BOX -->
+  <section id="s-box" class="screen mystery">
+    <h2>Your fate is sealed inside...</h2>
+    <div class="stage wiggle" id="stage" role="button" tabindex="0" aria-label="Open the mystery box for your punishment results">
+      <div class="shadowfloor"></div>
+      <div class="beam"></div>
+      <div class="tilt">
+        <div class="spinner" id="spinner">
+          <div class="body">
+            <div class="bf bottom"></div>
+            <div class="bf glow"></div>
+            <div class="bf back"></div>
+            <div class="bf left"></div>
+            <div class="bf right"></div>
+            <div class="bf front"><span class="q">?</span></div>
+          </div>
+          <div class="lid" id="lid">
+            <div class="lf under"></div>
+            <div class="lf back"></div>
+            <div class="lf left"></div>
+            <div class="lf right"></div>
+            <div class="lf front"></div>
+            <div class="lf top"></div>
+          </div>
         </div>
       </div>
     </div>
+    <div class="tap" id="tapHint" role="presentation"><span class="finger" aria-hidden="true">👆</span> Tap to open for your punishment results</div>
+  </section>
 
-    <!-- DASHBOARD -->
-    <div class="card">
-      <div class="dash-header">
-        <div>
-          <div class="dash-title">KaKa Calm Dashboard</div>
-          <div class="dash-sub">Track your streak and total time</div>
+  <!-- 4. RESULT -->
+  <section id="s-result" class="screen">
+    <div class="stage3d">
+      <div class="rcard" id="rcard">
+        <div class="resline" id="resLine"></div>
+        <div class="score" id="score">0<small>/100</small></div>
+        <div class="meter" aria-hidden="true"><i id="meterFill"></i></div>
+        <div class="mlab" aria-hidden="true"><span>Needs help</span><span>Sane</span></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="dx" id="dx"></div>
+        <div class="bubble">
+          <div class="who"><span id="whoIcon">😏</span><em id="whoName" style="font-style:normal"></em></div>
+          <div id="roast"></div>
         </div>
-        <div class="dash-sub" id="todayLabel">Today: 0 sessions</div>
+        <div class="emojis" id="emojis" aria-hidden="true"></div>
+        <button class="btn cyan" id="reset">Reset &amp; go again</button>
       </div>
-
-      <div class="stats-row">
-        <div class="stat">
-          <div class="stat-label">Completed sessions</div>
-          <div class="stat-value" id="sessionsCount">0</div>
-          <div class="stat-tag">Keep showing up</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Total breath time</div>
-          <div class="stat-value" id="totalMinutes">0.0 min</div>
-          <div class="stat-tag">Lifetime on this device</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Best streak</div>
-          <div class="stat-value" id="bestStreak">0 days</div>
-          <div class="stat-tag">Highest daily streak</div>
-        </div>
-      </div>
-
-      <div class="progress-bar">
-        <div class="progress-fill" id="sessionProgress"></div>
-      </div>
-
-      <div class="session-log" id="sessionLog"></div>
     </div>
-  </div>
+  </section>
 
-  <script>
-    // Levels
-    const levels = [
-      {
-        id: 1,
-        name: "Level 1 • Soft Start",
-        pattern: { inhale: 7, hold: 4, exhale: 7, rest: 4 },
-        cycles: 4,
-        description: "Inhale 7 • Hold 4 • Exhale 7 • Rest 4",
-      },
-      {
-        id: 2,
-        name: "Level 2 • KaKa Box",
-        pattern: { inhale: 4, hold: 4, exhale: 4, rest: 4 },
-        cycles: 6,
-        description: "Classic 4×4 box breathing",
-      },
-      {
-        id: 3,
-        name: "Level 3 • Deep Ocean",
-        pattern: { inhale: 6, hold: 6, exhale: 8, rest: 4 },
-        cycles: 5,
-        description: "Deeper, slower waves",
-      },
-      {
-        id: 4,
-        name: "Level 4 • Power Focus",
-        pattern: { inhale: 5, hold: 7, exhale: 8, rest: 5 },
-        cycles: 4,
-        description: "Longer holds for focus",
-      },
-    ];
+  <p class="fine">Not real science. Not real medical advice. Please do hydrate.</p>
+</div>
 
-    const phaseOrder = ["inhale", "hold", "exhale", "rest"];
+<script>
+(function(){
+  /* ================= DATA ================= */
+  var NIVEA_SVG =
+    '<svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<rect x="10" y="40" width="100" height="46" rx="10" fill="#0a3d9c" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>' +
+    '<rect x="10" y="40" width="100" height="14" fill="#0b4cc0" opacity=".6"/>' +
+    '<ellipse cx="60" cy="40" rx="50" ry="17" fill="#1e63e0" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>' +
+    '<ellipse cx="60" cy="37" rx="42" ry="12.5" fill="#3b86ff"/>' +
+    '<text x="60" y="42" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="15" fill="#fff" letter-spacing="1">NIVEA</text>' +
+    '<rect x="20" y="60" width="80" height="18" rx="4" fill="#fff" opacity=".92"/>' +
+    '<text x="60" y="73" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="11" fill="#0a3d9c">CREAM</text>' +
+    '</svg>';
 
-    const phaseLabels = {
-      inhale: "INHALE",
-      hold: "HOLD",
-      exhale: "EX-HALE",
-      rest: "REST",
-    };
+  var ITEMS = [
+    {id:'hand',  name:'Hand',        icon:'✋',  who:'your hand'},
+    {id:'couch', name:'Couch',       icon:'🛋️', who:'the couch'},
+    {id:'sock',  name:'Tube Sock',   icon:'🧦',  who:'the tube sock'},
+    {id:'banana',name:'Banana Peel', icon:'🍌',  who:'the banana peel'},
+    {id:'nivea', name:'Nivea Cream', svg:NIVEA_SVG, who:'the Nivea tin'}
+  ];
 
-    const phaseInstructions = {
-      inhale: "Start in-haling now inside the circle.\nLet your belly grow.",
-      hold: "HOLD your breath here.\nStay relaxed, no tension in the neck.",
-      exhale: "Now ex-hale slowly.\nLet all the air melt out.",
-      rest: "Soft pause.\nJust chill, KaKa style, before the next inhale.",
-    };
+  // tier 0 = 1-10 ... tier 9 = 91-100, tier 10 = 101+
+  var SCORES = [90,80,70,50,40,30,20,10,5,1,0];
 
-    const phaseBallClass = {
-      inhale: "state-inhale",
-      hold: "state-hold",
-      exhale: "state-exhale",
-      rest: "state-rest",
-    };
+  var TIERS = [
+    {verdict:"Not bad. Perhaps there's hope for you.", dx:"Mild curiosity. Treatable with fresh air and a hobby.", emoji:"😇👍✨"},
+    {verdict:"Alrighty then. Not judging. Haha.", dx:"Casual enthusiast. Still welcome at family dinners.", emoji:"😏🤷‍♂️"},
+    {verdict:"Yikes. Looks like you like yourself a lot.", dx:"Acute self-appreciation. Mirror time should be monitored.", emoji:"😬🫣"},
+    {verdict:"FAILING SCORE. You should seek some help.", dx:"Chronic condition. Prescription: literally any other hobby.", emoji:"🚨📉😵"},
+    {verdict:"This is past concerning, my friend.", dx:"Severe dedication. A specialist has been notified, against their will.", emoji:"😳🆘🧓"},
+    {verdict:"The group chat has been notified.", dx:"Level 5 emergency. Screenshots are circulating.", emoji:"📱👀💀"},
+    {verdict:"Your doctor asked for a second doctor.", dx:"Needs a witness protection program and a new zip code.", emoji:"🩺🧊😶"},
+    {verdict:"Scientists have questions. So do the police.", dx:"Active case study. Medical journals are fighting over you.", emoji:"🔬🚓😱"},
+    {verdict:"There is no coming back from this.", dx:"Terminal. Hilarious, but terminal.", emoji:"⚰️🕯️😭"},
+    {verdict:"Padded room. Free pudding. Bring a friend.", dx:"Needs inpatient care. Visiting hours are brutal.", emoji:"🛏️🍮🔔"},
+    {verdict:"IMMEDIATE CLINICAL HELP REQUIRED.", dx:"This is not a score, it's a cry for help. Please see a licensed professional today. Bring snacks.", emoji:"🚑🧠🆘🫂"}
+  ];
 
-    const statusLabel = document.getElementById("statusLabel");
-    const levelRow = document.getElementById("levelRow");
-    const circleProgress = document.getElementById("circleProgress");
-    const circleBall = document.getElementById("circleBall");
-    const phaseLabelEl = document.getElementById("phaseLabel");
-    const instructionText = document.getElementById("instructionText");
-    const hintText = document.getElementById("hintText");
-    const timerDisplay = document.getElementById("timerDisplay");
-    const cycleIndicator = document.getElementById("cycleIndicator");
-    const startPauseBtn = document.getElementById("startPauseBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const sessionProgress = document.getElementById("sessionProgress");
+  var ROASTS = {
+    hand:[
+      "Solo hand, light cardio. Your wrist sends its regards and a polite thank you.",
+      "Alrighty then. Not judging. Your right hand is just starting to look like it's in a hostage video.",
+      "Yikes. Looks like you like yourself a lot. Your hand has a favorite song now.",
+      "Ohhh, heeey buddy... *wheezes* ...I couldn't help but notice the calluses. I'm not mad. I'm... intrigued. Seek help. And buy curtains.",
+      "You and your hand are in a committed relationship. Your hand is the one looking for the exit. Also, I'm in your hedge. Don't mind me. Seek help.",
+      "Heh... ehhh... I've been watching your hand for a while now. It's so tired. Oh, the stories it could tell. It would want a lawyer first.",
+      "Your hand needs representation. I'd like to offer my testimony as the old guy in the bathrobe at your window. It's mostly heavy breathing.",
+      "Your hand has applied for asylum in another body. A doctor wants to examine you with a very long stick, from very far away.",
+      "Medical journals have stopped publishing about you out of respect. See a professional. Not the guy in the bathrobe. Definitely not him. Run.",
+      "Your hand is basically an emotional support animal at this point. Admit yourself. We'll bring the pudding. Mr. Bathrobe is already in the lobby.",
+      "This isn't a punishment. This is an intervention. Your hand left a note and the note says 'help me.' Please call a licensed professional, then tell the guy in the bathrobe he can stop clapping."
+    ],
+    couch:[
+      "The couch felt a light breeze. Cushions are fine. Everyone relax.",
+      "Alrighty then. Not judging. But the cushion by the left arm is looking real tired.",
+      "Yikes. Looks like you like yourself a lot. The couch has started avoiding eye contact.",
+      "Ohhh, heeey... *wheezes* ...nice couch. Real nice. Those cushions have seen things. Seek help, buddy. And a new couch.",
+      "Even the springs sound like they're begging. Also, a man in a bathrobe is leaning on your fence whispering 'atta boy.' That's not a compliment. Seek help.",
+      "Your couch has more of a past than you do. Heh... ehhh... I left a little notepad in the cushions. For my records. Don't read it.",
+      "The couch filed a restraining order and the cushions testified. It was brutal. The weird guy in the robe brought snacks to the trial.",
+      "Furniture stores have your photo at the door. Scientists have named your couch Patient Zero. The neighbor is already writing the sequel.",
+      "Your couch is in therapy. Its therapist is now also in therapy. Please see a doctor before the sofa does.",
+      "The couch has been declared a crime scene, a museum, and a cry for help all at once. Admit yourself. There's pudding.",
+      "Clinical help. Now. Set the couch on fire (safely), call a professional, and tell the guy in the bathrobe he can stop giving you the thumbs up."
+    ],
+    sock:[
+      "One sock, light duty. It's fine. Wash it. Wash it twice.",
+      "Alrighty then. Not judging. That sock has a little crunch to it though.",
+      "Yikes. Looks like you like yourself a lot. Your sock drawer is nervous.",
+      "Heeey buddy... *wheezes* ...a tube sock. Classic choice. Very... vintage. Hehe. Seek help.",
+      "That sock stands up on its own and salutes you. Concerning. An old guy in a bathrobe is nodding slowly in approval from the bushes. Seek help.",
+      "The laundromat has a poster of you. 'Do not accept laundry from this person.' Ehhh... I'll take your laundry, though. For science.",
+      "You've gone through more tube socks than a marching band. Your washing machine is in therapy and the guy in the robe is taking notes.",
+      "That sock is a biohazard with a heel. A hazmat team is on the way and one old man in a bathrobe tagged along, uninvited, wheezing.",
+      "Socks worldwide have met in secret. They are afraid. Seek professional help. The bathrobe man does not count as a professional.",
+      "You're banned from four sock aisles in three states. Admit yourself before another sock is harmed. We'll bring the pudding.",
+      "Clinical intervention required. Sock rehab doesn't exist, so we're building one just for you. The sock needs counseling too. Bring snacks."
+    ],
+    banana:[
+      "A banana peel? Interesting choice. Mild slip-up. Move on, nothing to see.",
+      "Alrighty then. Not judging. That's just quite the fruit-based lifestyle.",
+      "Yikes. Looks like you like yourself a lot. The fruit bowl is on high alert.",
+      "Ohhh, heeey... *wheezes* ...a banana peel. Hehe. Interesting. Slippery. Seek help, buddy.",
+      "Monkeys formed a support group for what you've done to bananas. A man in a bathrobe showed up to the meeting. Uninvited. Seek help.",
+      "Produce aisle security has your picture. The guy in the bathrobe has your picture too, and his is framed. Ehhh...",
+      "Potassium levels: criminal. Your doctor ordered a full panel and a priest, and the old guy in the robe is waiting in your parking lot.",
+      "The Banana Council has declared you a threat to the industry and to yourself. They're writing a strongly worded email.",
+      "Zoologists, psychologists, and fruit farmers all replied-all on the same email: 'Somebody do something.' Don't let it be the bathrobe man.",
+      "You are a walking public service announcement. Please check into a facility with a nice fruit-free menu. We'll bring the pudding.",
+      "Clinical help. Immediately. No more bananas. Not even in smoothies. The guy in the robe is crying tears of joy and that's the scariest part."
+    ],
+    nivea:[
+      "Smooth start. Your skin is thriving. Your elbows are jealous.",
+      "Alrighty then. Not judging. Super soft hands though, huh? Suspicious.",
+      "Yikes. Looks like you like yourself a lot. That blue tin is emptying fast.",
+      "Heeey buddy... *wheezes* ...Nivea, huh? Smooth. Real smooth. Hehe. Seek help.",
+      "Dermatologists have a group chat about you. The guy in the bathrobe is in it too. He's typing.",
+      "You've gone through more Nivea than a day spa. The pharmacist makes eye contact, then runs to the back. Ehhh...",
+      "Your skin is flawless, your soul is cracked. A man in a robe is sniffing the air from the hedge, whispering 'hydrated.'",
+      "Nivea has sent you a letter. It's just a lawyer's business card and a tiny sympathy card.",
+      "You are the most moisturized person in a padded room. Science is baffled. The guy in the bathrobe is thrilled.",
+      "The blue tin is now evidence. Detectives opened a case. An old man in a bathrobe is bringing them coffee. Seek help.",
+      "Clinical help. Stat. We love you, the tin loves you, and the guy in the bathrobe is concerned in the worst possible way."
+    ]
+  };
 
-    const sessionsCountEl = document.getElementById("sessionsCount");
-    const totalMinutesEl = document.getElementById("totalMinutes");
-    const bestStreakEl = document.getElementById("bestStreak");
-    const sessionLog = document.getElementById("sessionLog");
-    const todayLabel = document.getElementById("todayLabel");
+  var ZERO = {
+    score:100,
+    verdict:"Zero? Saint, or liar. We are suspicious.",
+    dx:"Pure soul or compulsive fibber. Further testing required, with a lie detector and snacks.",
+    roast:"A perfect 100. Either you're the purest soul in the friend group or you're lying to a calculator. We're going with liar. Prove us wrong, buddy.",
+    emoji:"😇🤥🕵️"
+  };
 
-    const STORAGE_KEY = "breathWithKakaStats_v1";
+  /* ================= HELPERS ================= */
+  var $ = function(id){return document.getElementById(id)};
+  var SCREENS = ['s-select','s-count','s-box','s-result'];
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = null, count = 0;
 
-    let stats = {
-      sessions: 0,
-      totalSeconds: 0,
-      bestStreak: 0,
-      streakLastDate: null,
-      recentSessions: [],
-    };
-
-    function loadStats() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          stats = Object.assign(stats, parsed);
-        }
-      } catch (e) {}
-      renderStats();
+  function show(id){
+    SCREENS.forEach(function(s){ $(s).classList.toggle('active', s === id) });
+    window.scrollTo({top:0, behavior: reduce ? 'auto' : 'smooth'});
+  }
+  function colorFor(score){
+    if(score >= 80) return '#b6ff3b';
+    if(score >= 60) return '#ffcf3a';
+    if(score >= 35) return '#ff7a2f';
+    return '#ff3fa4';
+  }
+  function confetti(n){
+    if(reduce) return;
+    var bits = ['🎉','✨','🎊','⭐','💥','🍌','🧦','🔥','🍮'];
+    for(var i = 0; i < n; i++){
+      var el = document.createElement('span');
+      el.className = 'confetti';
+      el.textContent = bits[Math.floor(Math.random()*bits.length)];
+      el.style.left = (Math.random()*100) + 'vw';
+      el.style.fontSize = (1.1 + Math.random()*1.5) + 'rem';
+      el.style.animationDuration = (2.2 + Math.random()*2.2) + 's';
+      el.style.animationDelay = (Math.random()*0.5) + 's';
+      document.body.appendChild(el);
+      setTimeout((function(e){ return function(){ e.remove() } })(el), 5600);
     }
+  }
+  function iconHTML(item){ return item.svg ? item.svg : item.icon }
 
-    function saveStats() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-      } catch (e) {}
+  /* ================= SELECT GRID (3D tilt) ================= */
+  var grid = $('grid');
+  ITEMS.forEach(function(item){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tile';
+    b.setAttribute('aria-label', 'Choose ' + item.name);
+    b.innerHTML =
+      '<span class="t-inner">' +
+        '<span class="slab"></span><span class="slab2"></span>' +
+        '<span class="face"></span>' +
+        '<span class="icon">' + iconHTML(item) + '</span>' +
+        '<span class="label">' + item.name + '</span>' +
+      '</span>';
+    function tilt(e){
+      var r = b.getBoundingClientRect();
+      var x = (e.clientX - r.left)/r.width, y = (e.clientY - r.top)/r.height;
+      b.style.setProperty('--ry', ((x - .5) * 26) + 'deg');
+      b.style.setProperty('--rx', ((.5 - y) * 26) + 'deg');
+      b.style.setProperty('--mx', (x*100) + '%');
+      b.style.setProperty('--my', (y*100) + '%');
+      b.classList.add('live');
     }
-
-    function getTodayStr() {
-      const now = new Date();
-      return now.toISOString().slice(0, 10);
+    function untilt(){
+      b.classList.remove('live');
+      b.style.setProperty('--rx','0deg'); b.style.setProperty('--ry','0deg');
+      b.style.setProperty('--mx','50%'); b.style.setProperty('--my','30%');
     }
+    b.addEventListener('pointermove', tilt);
+    b.addEventListener('pointerdown', tilt);
+    b.addEventListener('pointerleave', untilt);
+    b.addEventListener('pointerup', untilt);
+    b.addEventListener('click', function(){ choose(item, b) });
+    grid.appendChild(b);
+  });
 
-    function updateStreak() {
-      const todayStr = getTodayStr();
-      const last = stats.streakLastDate;
-      if (!last) {
-        stats.bestStreak = 1;
-        stats.streakLastDate = todayStr;
-        return;
-      }
-      if (last === todayStr) return;
+  /* ================= FLOW ================= */
+  function choose(item, tile){
+    current = item;
+    var cs = getComputedStyle(tile);
+    var ped = $('chosen');
+    ped.style.setProperty('--a', cs.getPropertyValue('--a'));
+    ped.style.setProperty('--b', cs.getPropertyValue('--b'));
+    ped.style.setProperty('--dark', cs.getPropertyValue('--dark'));
+    ped.innerHTML = iconHTML(item);
+    $('countInput').value = '';
+    $('hint').textContent = '';
+    show('s-count');
+    setTimeout(function(){ $('countInput').focus({preventScroll:true}) }, 350);
+  }
+  $('back1').addEventListener('click', function(){ show('s-select') });
 
-      const lastDate = new Date(last);
-      const todayDate = new Date(todayStr);
-      const diffMs = todayDate - lastDate;
-      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays === 1) {
-        stats.bestStreak += 1;
-      } else {
-        stats.bestStreak = 1;
-      }
-      stats.streakLastDate = todayStr;
+  /* ---- Mystery box spin ---- */
+  var stage = $('stage'), spinner = $('spinner'), angle = -25, spinning = false, raf = null;
+  function loop(){
+    if(spinning){ angle += 0.55; spinner.style.transform = 'rotateY(' + angle + 'deg)'; }
+    raf = requestAnimationFrame(loop);
+  }
+  function resetBox(){
+    stage.classList.remove('opened');
+    stage.classList.add('wiggle');
+    spinner.style.transition = 'none';
+    angle = -25;
+    spinner.style.transform = 'rotateY(' + angle + 'deg)';
+    spinning = !reduce;
+    $('tapHint').style.visibility = 'visible';
+    if(!raf) loop();
+  }
+
+  function submitCount(){
+    var raw = $('countInput').value.trim();
+    var n = parseInt(raw, 10);
+    if(raw === '' || isNaN(n) || n < 0){
+      $('hint').textContent = 'Enter a number. Even if it hurts.';
+      $('countInput').focus();
+      return;
     }
+    count = n;
+    resetBox();
+    show('s-box');
+  }
+  $('go').addEventListener('click', submitCount);
+  $('countInput').addEventListener('keydown', function(e){ if(e.key === 'Enter') submitCount() });
 
-    function renderStats() {
-      sessionsCountEl.textContent = stats.sessions;
-      totalMinutesEl.textContent = (stats.totalSeconds / 60).toFixed(1) + " min";
-      bestStreakEl.textContent = stats.bestStreak + (stats.bestStreak === 1 ? " day" : " days");
+  function openBox(){
+    if(stage.classList.contains('opened')) return;
+    spinning = false;
+    stage.classList.remove('wiggle');
+    $('tapHint').style.visibility = 'hidden';
+    // ease to face the front with a nice angle
+    var target = Math.ceil((angle + 25)/360)*360 - 25;
+    spinner.style.transition = 'transform .8s cubic-bezier(.2,.8,.2,1)';
+    spinner.style.transform = 'rotateY(' + target + 'deg)';
+    setTimeout(function(){
+      stage.classList.add('opened');
+      confetti(30);
+    }, 700);
+    setTimeout(showResult, 2300);
+  }
+  stage.addEventListener('click', openBox);
+  stage.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openBox() } });
+  $('tapHint').addEventListener('click', openBox);
 
-      const todayStr = getTodayStr();
-      const todaySessions = stats.recentSessions.filter(
-        s => s.dateISO.slice(0, 10) === todayStr
-      ).length;
-      todayLabel.textContent = "Today: " + todaySessions + " session" + (todaySessions === 1 ? "" : "s");
-
-      sessionLog.innerHTML = "";
-      if (stats.recentSessions.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "log-item";
-        empty.textContent = "No sessions yet. Your KaKa calm journey starts now.";
-        sessionLog.appendChild(empty);
-        return;
-      }
-
-      const recent = [...stats.recentSessions].slice(-8).reverse();
-      for (const item of recent) {
-        const row = document.createElement("div");
-        row.className = "log-item";
-
-        const dt = new Date(item.dateISO);
-        const timeStr = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        const level = levels.find(l => l.id === item.levelId);
-        const levelName = level ? "L" + level.id : "Lv?";
-
-        row.innerHTML =
-          timeStr + " • " +
-          (item.seconds / 60).toFixed(1) + " min" +
-          `<span class="badge-level">${levelName}</span>`;
-        sessionLog.appendChild(row);
-      }
+  /* ---- Result ---- */
+  function showResult(){
+    spinning = false;
+    var d;
+    if(count === 0){
+      d = { score:ZERO.score, verdict:ZERO.verdict, dx:ZERO.dx, roast:ZERO.roast, emoji:ZERO.emoji, tier:-1 };
+    } else {
+      var t = Math.min(Math.ceil(count/10) - 1, 10);
+      d = { score:SCORES[t], verdict:TIERS[t].verdict, dx:TIERS[t].dx, roast:ROASTS[current.id][t], emoji:TIERS[t].emoji, tier:t };
     }
+    var card = $('rcard');
+    card.style.setProperty('--rc', colorFor(d.score));
+    $('resLine').textContent = count === 0
+      ? 'You did Destakee with ' + current.who + ' zero times'
+      : 'You did Destakee with ' + current.who + ' ' + count + (count === 1 ? ' time' : ' times');
+    $('verdict').textContent = d.verdict;
+    $('dx').innerHTML = '<b>Diagnosis:</b> ' + d.dx;
+    $('roast').textContent = d.roast;
+    $('emojis').textContent = d.emoji;
 
-    function recordSession() {
-      stats.sessions += 1;
-      stats.totalSeconds += Math.round(sessionTotalSeconds);
-      stats.recentSessions.push({
-        dateISO: new Date().toISOString(),
-        levelId: levels[currentLevelIndex].id,
-        seconds: sessionTotalSeconds,
-      });
-      updateStreak();
-      saveStats();
-      renderStats();
+    var creepy = d.tier >= 3;
+    $('whoIcon').textContent = creepy ? '🧓' : (d.tier === -1 ? '🕵️' : '😏');
+    $('whoName').textContent = creepy ? 'Your friendly neighbor in the bathrobe says:' : (d.tier === -1 ? 'The calculator says:' : 'Your buddies say:');
+
+    $('meterFill').style.width = '0%';
+    card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter');
+    show('s-result');
+
+    var scoreEl = $('score');
+    function setScore(v){ scoreEl.innerHTML = Math.round(v) + '<small>/100</small>' }
+    if(reduce){ setScore(d.score); $('meterFill').style.width = d.score + '%'; }
+    else {
+      setScore(0);
+      setTimeout(function(){ $('meterFill').style.width = d.score + '%' }, 300);
+      var start = null, dur = 1400;
+      (function step(ts){
+        if(!start) start = ts;
+        var p = Math.min((ts - start)/dur, 1);
+        setScore(d.score * (1 - Math.pow(1 - p, 3)));
+        if(p < 1) requestAnimationFrame(step);
+      })(performance.now());
     }
+    if(d.score >= 70) confetti(20);
+  }
 
-    function renderLevels() {
-      levelRow.innerHTML = "";
-      levels.forEach((level, idx) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "level-chip" + (idx === currentLevelIndex ? " active" : "");
-        chip.dataset.index = idx;
-        chip.innerHTML =
-          `<span>L${level.id} • ${level.pattern.inhale}/${level.pattern.hold}/${level.pattern.exhale}/${level.pattern.rest}</span>` +
-          `<small>${level.description}</small>`;
-        chip.addEventListener("click", () => {
-          if (running) return;
-          currentLevelIndex = idx;
-          updateLevelActive();
-          resetSessionState(false);
-        });
-        levelRow.appendChild(chip);
-      });
-    }
-
-    function updateLevelActive() {
-      const chips = levelRow.querySelectorAll(".level-chip");
-      chips.forEach(chip => {
-        const idx = parseInt(chip.dataset.index, 10);
-        chip.classList.toggle("active", idx === currentLevelIndex);
-      });
-    }
-
-    // SVG circle math
-    const RADIUS = 70;
-    const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-    circleProgress.style.strokeDasharray = CIRCUMFERENCE;
-    circleProgress.style.strokeDashoffset = CIRCUMFERENCE;
-
-    function setBallAngle(theta) {
-      const cx = 100 + RADIUS * Math.cos(theta);
-      const cy = 100 + RADIUS * Math.sin(theta);
-      circleBall.setAttribute("cx", cx.toString());
-      circleBall.setAttribute("cy", cy.toString());
-    }
-
-    function updateCircleProgress(progress) {
-      const angle = progress * 2 * Math.PI;
-      setBallAngle(angle);
-      const offset = CIRCUMFERENCE * (1 - progress);
-      circleProgress.style.strokeDashoffset = offset;
-    }
-
-    // Breathing session state
-    let currentLevelIndex = 0;
-    let currentPhase = "inhale";
-    let currentCycle = 0;
-    let phaseRemaining = 0;
-    let phaseDuration = 0;
-    let totalCycles = 0;
-    let sessionTotalSeconds = 0;
-    let running = false;
-    let timerIntervalId = null;
-
-    function resetSessionState(clearProgress = true) {
-      if (timerIntervalId) clearInterval(timerIntervalId);
-      running = false;
-      startPauseBtn.textContent = "Start Flow";
-      statusLabel.textContent = "Idle";
-
-      const level = levels[currentLevelIndex];
-      currentCycle = 0;
-      totalCycles = level.cycles;
-      currentPhase = "inhale";
-      phaseRemaining = 0;
-      phaseDuration = 0;
-      sessionTotalSeconds = 0;
-
-      timerDisplay.textContent = "0";
-      cycleIndicator.textContent = "Cycle 0 / " + level.cycles;
-      phaseLabelEl.textContent = "READY";
-      instructionText.textContent = "Tap Start Flow and follow the light.";
-      hintText.textContent = "When the light moves, INHALE; when it freezes, HOLD; when it keeps moving, EX-HALE.";
-
-      circleProgress.style.strokeDashoffset = CIRCUMFERENCE;
-      updateCircleProgress(0);
-      circleBall.setAttribute("class", "circle-ball " + phaseBallClass["rest"]);
-      if (clearProgress) sessionProgress.style.width = "0%";
-    }
-
-    function startSession() {
-      if (running) return;
-      running = true;
-      statusLabel.textContent = "Breathing";
-      startPauseBtn.textContent = "Pause";
-
-      const level = levels[currentLevelIndex];
-      totalCycles = level.cycles;
-
-      if (currentCycle === 0) {
-        currentCycle = 1;
-        currentPhase = "inhale";
-        startPhase();
-      }
-
-      timerIntervalId = setInterval(tickSecond, 1000);
-    }
-
-    function pauseSession() {
-      if (!running) return;
-      running = false;
-      startPauseBtn.textContent = "Resume";
-      statusLabel.textContent = "Paused";
-      if (timerIntervalId) clearInterval(timerIntervalId);
-    }
-
-    function startPhase() {
-      const level = levels[currentLevelIndex];
-      phaseDuration = level.pattern[currentPhase];
-      phaseRemaining = phaseDuration;
-
-      phaseLabelEl.textContent = phaseLabels[currentPhase] + " (" + phaseDuration + "s)";
-      instructionText.textContent = phaseInstructions[currentPhase];
-      cycleIndicator.textContent = "Cycle " + currentCycle + " / " + level.cycles;
-
-      circleBall.setAttribute("class", "circle-ball " + phaseBallClass[currentPhase]);
-      updateCircleProgress(0);
-      timerDisplay.textContent = phaseRemaining.toString();
-    }
-
-    function tickSecond() {
-      if (!running) return;
-
-      timerDisplay.textContent = phaseRemaining.toString();
-
-      const elapsedInPhase = phaseDuration - phaseRemaining;
-      const progress = phaseDuration > 0 ? elapsedInPhase / phaseDuration : 1;
-      updateCircleProgress(progress);
-
-      const level = levels[currentLevelIndex];
-      const secondsPerCycle =
-        level.pattern.inhale + level.pattern.hold + level.pattern.exhale + level.pattern.rest;
-      const totalSessionSeconds = secondsPerCycle * level.cycles;
-      const elapsedWholeSession = (currentCycle - 1) * secondsPerCycle + elapsedInPhase;
-      const pct = Math.min(100, (elapsedWholeSession / totalSessionSeconds) * 100);
-      sessionProgress.style.width = pct.toFixed(1) + "%";
-
-      sessionTotalSeconds += 1;
-
-      if (phaseRemaining <= 0) {
-        advancePhaseOrCycle();
-      } else {
-        phaseRemaining -= 1;
-      }
-    }
-
-    function advancePhaseOrCycle() {
-      const currentIndex = phaseOrder.indexOf(currentPhase);
-      const lastPhase = currentIndex === phaseOrder.length - 1;
-
-      if (!lastPhase) {
-        currentPhase = phaseOrder[currentIndex + 1];
-        startPhase();
-      } else {
-        const level = levels[currentLevelIndex];
-        if (currentCycle >= level.cycles) {
-          completeSession();
-        } else {
-          currentCycle += 1;
-          currentPhase = "inhale";
-          startPhase();
-        }
-      }
-    }
-
-    function completeSession() {
-      running = false;
-      if (timerIntervalId) clearInterval(timerIntervalId);
-      sessionProgress.style.width = "100%";
-      statusLabel.textContent = "Complete";
-      startPauseBtn.textContent = "Restart";
-
-      phaseLabelEl.textContent = "Nice work";
-      instructionText.textContent = "Level " + levels[currentLevelIndex].id + " complete. Enjoy the after-glow.";
-      hintText.textContent = "When you’re ready, try another round or step up a level.";
-
-      timerDisplay.textContent = "0";
-      recordSession();
-    }
-
-    startPauseBtn.addEventListener("click", () => {
-      if (!running && sessionProgress.style.width === "100%") {
-        resetSessionState(false);
-        startSession();
-        return;
-      }
-      if (!running) {
-        startSession();
-      } else {
-        pauseSession();
-      }
-    });
-
-    resetBtn.addEventListener("click", () => {
-      resetSessionState(true);
-    });
-
-    // Init
-    loadStats();
-    renderLevels();
-    resetSessionState(true);
-  </script>
+  $('reset').addEventListener('click', function(){
+    current = null; count = 0;
+    $('countInput').value = '';
+    spinning = false;
+    show('s-select');
+  });
+})();
+</script>
 </body>
 </html>
