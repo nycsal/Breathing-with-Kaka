@@ -76,6 +76,9 @@
     aspect-ratio:1/1.12;perspective:700px;-webkit-tap-highlight-color:transparent;
   }
   .tile:nth-child(5){grid-column:1 / -1;width:calc(50% - 9px);justify-self:center}
+  .tile.wide{grid-column:1 / -1;aspect-ratio:2.25/1;width:100%}
+  .tile.wide .icon{top:8%;height:52%;font-size:3.4rem}
+  .tile.wide .label{bottom:14px;left:14px;right:14px;font-size:.92rem;line-height:1.25}
   .tile:focus-visible{outline:3px solid #fff;outline-offset:6px;border-radius:26px}
   .t-inner{position:absolute;inset:0;display:block;transform-style:preserve-3d;
     transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .25s ease-out}
@@ -103,6 +106,13 @@
   .tile:nth-child(3){--a:#ff63b8;--b:#9b3dff;--dark:#52148f}
   .tile:nth-child(4){--a:#b6ff3b;--b:#16c46a;--dark:#0a6a36}
   .tile:nth-child(5){--a:#6aa8ff;--b:#6a35ff;--dark:#2a1580}
+  .tile:nth-child(6){--a:#ff5a5a;--b:#c4136b;--dark:#6e0a3c}
+  .tile:nth-child(6) .icon{animation:siren 1.2s ease-in-out infinite}
+  @keyframes siren{0%,100%{transform:translateZ(64px) scale(1) rotate(-6deg)}50%{transform:translateZ(64px) scale(1.12) rotate(6deg)}}
+  .contact{margin-top:16px;padding:14px 16px;border-radius:16px;text-align:center;font-weight:800;font-size:.95rem;line-height:1.4;
+    background:rgba(10,3,36,.7);border:2px dashed var(--gold);display:none}
+  .contact.on{display:block}
+  .contact .handle{display:block;margin-top:4px;font-family:var(--display);font-weight:900;font-size:1.05rem;color:var(--gold);word-break:break-all}
   @media (prefers-reduced-motion:no-preference){
     .icon{animation:bob 3s ease-in-out infinite}
     .tile:nth-child(2) .icon{animation-delay:-.6s}.tile:nth-child(3) .icon{animation-delay:-1.2s}
@@ -323,6 +333,7 @@
           <div class="who"><span id="whoIcon">😏</span><em id="whoName" style="font-style:normal"></em></div>
           <div id="roast"></div>
         </div>
+        <div class="contact" id="contact">📞 Self Helpers Anonymous<span class="handle">@help_Icant_stop</span>Open 24/7. Honestly, so are you.</div>
         <div class="emojis" id="emojis" aria-hidden="true"></div>
         <button class="btn cyan" id="reset">Reset &amp; go again</button>
       </div>
@@ -351,8 +362,21 @@
     {id:'couch', name:'Couch',       icon:'🛋️', who:'the couch'},
     {id:'sock',  name:'Tube Sock',   icon:'🧦',  who:'the tube sock'},
     {id:'banana',name:'Banana Peel', icon:'🍌',  who:'the banana peel'},
-    {id:'nivea', name:'Nivea Cream', svg:NIVEA_SVG, who:'the Nivea tin'}
+    {id:'nivea', name:'Nivea Cream', svg:NIVEA_SVG, who:'the Nivea tin'},
+    {id:'clinical', name:'Press here if you have a clinical problem', icon:'🚨', who:'', wide:true}
   ];
+
+  var CLINICAL = {
+    verdict:"Let's not kid ourselves.",
+    dx:"Self-aware, which is step one. Unfortunately, so far it's also the only step.",
+    emoji:"🚨🛋️🧦🍌🧴",
+    roasts:[
+      "Let's not kid ourselves. You have no shame. You can lie to yourself, but you cannot lie to others, and the others already know. Heh... ehhh... they've always known. Seek help. Preferably before the next tube sock files a missing-persons report. (Seriously though, if it's really affecting your life, please talk to a real professional.)",
+      "You walked up to a button that says 'clinical problem' and pressed it. Voluntarily. With confidence. No shame, buddy. I respect the honesty, the way you respect a smoke detector going off in your own kitchen. Seek help. And maybe a new hobby. Any hobby. (For real though, a real professional can help.)",
+      "Ohhh, heeey buddy... *wheezes* ...you pressed it. Nobody made you press it. That's called self-awareness, and it's the nicest thing about you. The rest, we'll let a professional handle. Seek help, and please lock your windows. I'm in the hedge again.",
+      "You can lie to yourself all day. 'It's just a phase.' 'Everybody does it.' Sure, Jan. But you can't lie to others, because others have eyes, noses, and a group chat. Take a deep breath, take a hard look, and then take yourself to someone licensed. (We mean it, a real professional can actually help.)"
+    ]
+  };
 
   // tier 0 = 1-10 ... tier 9 = 91-100, tier 10 = 101+
   var SCORES = [90,80,70,50,40,30,20,10,5,1,0];
@@ -451,7 +475,7 @@
   var $ = function(id){return document.getElementById(id)};
   var SCREENS = ['s-select','s-count','s-box','s-result'];
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var current = null, count = 0;
+  var current = null, count = 0, clinical = false;
 
   function show(id){
     SCREENS.forEach(function(s){ $(s).classList.toggle('active', s === id) });
@@ -485,7 +509,7 @@
   ITEMS.forEach(function(item){
     var b = document.createElement('button');
     b.type = 'button';
-    b.className = 'tile';
+    b.className = 'tile' + (item.wide ? ' wide' : '');
     b.setAttribute('aria-label', 'Choose ' + item.name);
     b.innerHTML =
       '<span class="t-inner">' +
@@ -519,6 +543,13 @@
   /* ================= FLOW ================= */
   function choose(item, tile){
     current = item;
+    if(item.id === 'clinical'){
+      clinical = true; count = 0;
+      resetBox();
+      show('s-box');
+      return;
+    }
+    clinical = false;
     var cs = getComputedStyle(tile);
     var ped = $('chosen');
     ped.style.setProperty('--a', cs.getPropertyValue('--a'));
@@ -558,6 +589,7 @@
       return;
     }
     count = n;
+    clinical = false;
     resetBox();
     show('s-box');
   }
@@ -587,7 +619,10 @@
   function showResult(){
     spinning = false;
     var d;
-    if(count === 0){
+    if(clinical){
+      d = { score:0, verdict:CLINICAL.verdict, dx:CLINICAL.dx, emoji:CLINICAL.emoji, tier:10,
+            roast:CLINICAL.roasts[Math.floor(Math.random()*CLINICAL.roasts.length)] };
+    } else if(count === 0){
       d = { score:ZERO.score, verdict:ZERO.verdict, dx:ZERO.dx, roast:ZERO.roast, emoji:ZERO.emoji, tier:-1 };
     } else {
       var t = Math.min(Math.ceil(count/10) - 1, 10);
@@ -595,7 +630,10 @@
     }
     var card = $('rcard');
     card.style.setProperty('--rc', colorFor(d.score));
-    $('resLine').textContent = count === 0
+    $('contact').classList.toggle('on', clinical);
+    $('resLine').textContent = clinical
+      ? 'You pressed the clinical problem button. On purpose.'
+      : count === 0
       ? 'You did Destakee with ' + current.who + ' zero times'
       : 'You did Destakee with ' + current.who + ' ' + count + (count === 1 ? ' time' : ' times');
     $('verdict').textContent = d.verdict;
@@ -603,7 +641,7 @@
     $('roast').textContent = d.roast;
     $('emojis').textContent = d.emoji;
 
-    var creepy = d.tier >= 3;
+    var creepy = d.tier >= 3 || clinical;
     $('whoIcon').textContent = creepy ? '🧓' : (d.tier === -1 ? '🕵️' : '😏');
     $('whoName').textContent = creepy ? 'Your friendly neighbor in the bathrobe says:' : (d.tier === -1 ? 'The calculator says:' : 'Your buddies say:');
 
@@ -629,7 +667,7 @@
   }
 
   $('reset').addEventListener('click', function(){
-    current = null; count = 0;
+    current = null; count = 0; clinical = false;
     $('countInput').value = '';
     spinning = false;
     show('s-select');
